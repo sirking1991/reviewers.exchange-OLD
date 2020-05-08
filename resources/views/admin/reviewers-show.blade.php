@@ -63,12 +63,18 @@
                 {!! Form::text('price', $record->price ?? '30', ['class' => 'form-control']) !!} 
             </div>
         </div>
-
+        
+        
         <div class="row" style="margin-top:20px;">
             <div class="col-12">
-                <livewire:questionnaire-list :reviewer_id="$record->id"/>
+                @if (0 != $id)
+                    <livewire:questionnaire-list :reviewer_id="$record->id"/>
+                @else
+                    <span class='font-italic text-muted'>The questionnaires will appear after you've save this reviewer.</span>
+                @endif
             </div>
         </div>
+
         
     </div>    
 @endsection

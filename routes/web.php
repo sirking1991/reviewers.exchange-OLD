@@ -26,6 +26,7 @@ Route::middleware(['checkifadmin'])->group(function () {
     Route::get('/admin/reviewers/{id?}', 'ReviewerController@adminShow');
     Route::match(['post', 'put'], '/admin/reviewers/{id?}', 'ReviewerController@save');
     Route::get('/admin/reviewers/{id}/delete', 'ReviewerController@delete');
+    Route::match(['post', 'put'], '/admin/reviewers/{reviewersId}/question/{id?}', 'ReviewerController@saveQuestion');
 
 });
 

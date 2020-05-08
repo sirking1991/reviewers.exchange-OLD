@@ -14,7 +14,7 @@ class QuestionnaireList extends Component
     {
         $this->reviewerId = $reviewerId;
 
-        $this->questionnaires = \App\Questionnaire::where('reviewer_id', $this->reviewerId)->get();
+        $this->questionnaires = \App\Questionnaire::where('reviewer_id', $this->reviewerId)->with('answers')->get();
     }
 
     public function render()
@@ -23,6 +23,6 @@ class QuestionnaireList extends Component
     }
 
     public function openQuestionDetail($id) {
-        return view('livewire.questionnaire-detail')->with('id', $id);
+        return view('livewire.questionnaire-detail');
     }
 }

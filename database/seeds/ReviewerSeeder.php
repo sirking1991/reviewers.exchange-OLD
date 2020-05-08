@@ -14,7 +14,7 @@ class ReviewerSeeder extends Seeder
         $data = [];
         $faker = Faker\Factory::create();
         
-        for ($n=0; $n < 100; $n++) { 
+        for ($n=0; $n < 50; $n++) { 
             $data[] = [
                 'name' => $faker->sentence(),
                 'status' => $faker->randomElement(['inactive','active']),

@@ -18,6 +18,7 @@ class CreateReviewersTable extends Migration
             $table->string('name');
             $table->string('status')->default('draft');
             $table->string('randomly_display_questionnaires', 3)->default('yes');
+            $table->integer('questionnaires_to_display')->default(30);
             $table->integer('time_limit')->default(0);
             $table->double('price')->default(0);
             $table->timestamps();

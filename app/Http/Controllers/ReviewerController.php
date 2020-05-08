@@ -39,7 +39,8 @@ class ReviewerController extends Controller
     {
         $record = \App\Reviewer::find($id);
 
-        if(!$record) abort(404);
+        // if(!$record) abort(404);
+        if(!$record) $record = new \App\Reviewer();
 
         return view('admin/reviewers-show', ['record' => $record]);
     }    

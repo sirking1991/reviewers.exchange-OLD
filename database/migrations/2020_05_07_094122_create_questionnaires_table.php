@@ -16,12 +16,9 @@ class CreateQuestionnairesTable extends Migration
         Schema::create('questionnaires', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('reviewer_id')->index();
-            $table->string('question');
-            $table->text('remarks');
-            $table->string('randomly_display_answers', 3)->default('yes');
-            $table->text('answers');
-            $table->text('correct_answers');
-            $table->text('correct_answer_explanation');
+            $table->text('question');
+            $table->string('difficulty_level')->default('normal');
+            $table->string('randomly_display_answers', 3)->default('yes');            
             $table->timestamps();
         });
     }
