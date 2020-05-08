@@ -26,7 +26,7 @@ class ReviewerController extends Controller
     {
         $list = \App\Reviewer::where('name', 'like', "%{$request->search}%")->paginate(10);
 
-        return view('admin/reviewers-list', ['list' => $list, 'search' => $request->search]);          
+        return view('admin/reviewers-list', ['list' => $list, 'search' => $request->search]);
     }
 
     /**
@@ -35,15 +35,15 @@ class ReviewerController extends Controller
      * @param  integer  $id
      * @return \Illuminate\Http\Response
      */
-    public function adminShow($id = null) 
+    public function adminShow($id = null)
     {
         $record = \App\Reviewer::find($id);
 
         // if(!$record) abort(404);
-        if(!$record) $record = new \App\Reviewer();
+        if (!$record) $record = new \App\Reviewer();
 
         return view('admin/reviewers-show', ['record' => $record]);
-    }    
+    }
 
     /**
      * UpSave record
@@ -72,7 +72,7 @@ class ReviewerController extends Controller
         $request->session()->flash('status', 'Record saved');
 
         return redirect('/admin/reviewers/' . $record->id);
-    }   
+    }
 
     public function delete($id)
     {
@@ -80,9 +80,38 @@ class ReviewerController extends Controller
 
         if (!$record) return response('', 404);
 
-        
+
         $record->delete();
 
         return response()->json();
-    }     
+    }
+
+    public function saveQuestion(Request $request, String $reviewerId, String $questionId)
+    {
+        dd($reviewerId, $questionId, $request->all());
+
+        if (0 == $questionId) {
+            // create a new question record
+            $question = \App\Questionnaire::create([
+                'reviewer_id' => $reviewerId,
+                'question' => $request->input('question') ?? '',
+                'remarks' => $request->input('remarks') ?? '',
+                'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
+                'difficulty_level' => $request->input('difficulty_level') ?? 'normal',
+            ]);
+            if (null != $request->input('answers')) {
+                foreach ($request->input('answers') as $answer) {
+                    \App\Answer::create([
+                        'questionnaire_id' => $question->id,
+                        'answer' => $answer->{'answer'},
+                        'is_correct' => $answer->{'is_correct'},
+                        'answer_explanation' => $answer->{'answer_explanation'},
+                    ]);
+                }
+            }
+        } else {
+            // updating question record
+            
+        }
+    }
 }

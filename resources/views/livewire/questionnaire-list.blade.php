@@ -106,6 +106,7 @@
     </div>
 </div>
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <script>
     var questionnaires = {!! $questionnaires !!};
@@ -179,8 +180,19 @@
             questionnaires[selectedQuestionIndex] = data;
         }
         // save questionnaires to server
-        $('#questionModal').modal('hide');
-        loadQuestionnaires();
+        var questionId = undefined!=selectedQuestion.id ? selectedQuestion.id : 0;
+        $.ajax({
+            url: '/admin/reviewers/{{ $reviewerId }}/question/' + questionId,
+            method: 'POST',
+            data: data,
+            dataType: 'json',       
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
+        }).then(function(data){
+            console.log(data);
+        });
+
+        // $('#questionModal').modal('hide');
+        // loadQuestionnaires();
     }
 
     function openAnswerDetail(id){
