@@ -57,7 +57,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedQuestion()">Delete</button>
-        <button type="button" class="btn btn-sm btn-success" onclick="saveQuestion()">Save</button>
+        <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
       </div>
     </div>
   </div>
@@ -181,6 +181,8 @@
         }
         // save questionnaires to server
         var questionId = undefined!=selectedQuestion.id ? selectedQuestion.id : 0;
+        $('#saveQuestionBtn').html("Saving...");
+        $('#saveQuestionBtn').addClass('disabled');
         $.ajax({
             url: '/admin/reviewers/{{ $reviewerId }}/question/' + questionId,
             method: 'POST',
@@ -191,6 +193,8 @@
             console.log(data);
             questionnaires = data;
             loadQuestionnaires();
+            $('#saveQuestionBtn').html("Save");
+            $('#saveQuestionBtn').removeClass('disabled');            
             $('#questionModal').modal('hide');        
         });
         
