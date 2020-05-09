@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Reviewer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReviewerController extends Controller
 {
@@ -88,14 +89,11 @@ class ReviewerController extends Controller
 
     public function saveQuestion(Request $request, String $reviewerId, String $questionId)
     {
-        dd($reviewerId, $questionId, $request->all());
-
         if (0 == $questionId) {
-            // create a new question record
+            Log::debug('create a new question record');
             $question = \App\Questionnaire::create([
                 'reviewer_id' => $reviewerId,
                 'question' => $request->input('question') ?? '',
-                'remarks' => $request->input('remarks') ?? '',
                 'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
                 'difficulty_level' => $request->input('difficulty_level') ?? 'normal',
             ]);
@@ -103,15 +101,63 @@ class ReviewerController extends Controller
                 foreach ($request->input('answers') as $answer) {
                     \App\Answer::create([
                         'questionnaire_id' => $question->id,
-                        'answer' => $answer->{'answer'},
-                        'is_correct' => $answer->{'is_correct'},
-                        'answer_explanation' => $answer->{'answer_explanation'},
+                        'answer' => $answer['answer'],
+                        'is_correct' => $answer['is_correct'],
+                        'answer_explanation' => $answer['answer_explanation']??'',
                     ]);
                 }
             }
         } else {
-            // updating question record
-            
+            Log::debug('updating question record');
+            \App\Questionnaire::where('id', $questionId)
+                ->update([
+                    'question' => $request->input('question') ?? '',
+                    'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
+                    'difficulty_level' => $request->input('difficulty_level') ?? 'normal',
+                ]);
+            if (null != $request->input('answers') || 0 == count($request->input('answers'))) {
+                $updateDate = date('Y-m-d H:i:s');
+                foreach ($request->input('answers') as $answer) {
+                    if (isset($answer['id'])) {
+                        Log::debug('updating answer');
+                        \App\Answer::where('id', $answer['id'])
+                            ->update([
+                                'answer' => $answer['answer']??'',
+                                'is_correct' => $answer['is_correct']??'no',
+                                'answer_explanation' => $answer['answer_explanation']??'',
+                                'updated_at' => $updateDate,
+                            ]);
+                    } else {                    
+                        Log::debug('creating new answer');
+                        \App\Answer::create([
+                            'questionnaire_id' => $questionId,
+                            'answer' => $answer['answer']??'',
+                            'is_correct' => $answer['is_correct']??'no',
+                            'answer_explanation' => $answer['answer_explanation']??'',
+                        ]);
+                    
+                        
+                    }
+                }
+                // delete other answers that where not part of the answer submitted
+                \App\Answer::where('questionnaire_id', $questionId)
+                            ->where('updated_at', '!=', $updateDate)
+                            ->delete();
+            } else {
+                // delete all existing answers
+                \App\Answer::where('questionnaire_id', $questionId)->delete();
+            }
         }
+
+        return \App\Questionnaire::where('reviewer_id', $reviewerId)->with('answers')->get();
+    }
+
+    public function deleteQuestion(String $reviewerId, String $questionId){
+        Log::debug('deleting question ' . $questionId);
+
+        \App\Answer::where('questionnaire_id', $questionId)->delete();
+        \App\Questionnaire::where('id', $questionId)->delete();
+
+        return \App\Questionnaire::where('reviewer_id', $reviewerId)->with('answers')->get();
     }
 }

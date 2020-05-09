@@ -10886,3 +10886,7 @@ a.text-dark:focus {
   cursor: pointer;
 }
 
+.row {
+  margin-bottom: 10px;
+}
+

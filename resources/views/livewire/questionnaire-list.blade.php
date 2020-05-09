@@ -15,12 +15,12 @@
 <div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
-      <div class="modal-header">
+      {{-- <div class="modal-header">
         <h5 class="modal-title" id="questionModalLabel">Question</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-      </div>
+      </div> --}}
       <div class="modal-body">        
             <div class="row">
                 <div class="col-md-12">
@@ -29,16 +29,14 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12">
-                    {!! Form::label('remarks', 'Remarks:', ['class' => 'control-label']) !!}
-                    {!! Form::textarea('remarks', '' , ['class' => 'form-control', 'rows'=>'3']) !!}                
-                </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     {!! Form::label('randomly_display_answers', 'Randomly display answers:', ['class' => 'control-label']) !!}
                     {!! Form::select('randomly_display_answers', ['yes' => 'Yes', 'no' => 'No'], '', ['class' => 'form-control']) !!}
-                </div>                
+                </div>      
+                <div class="col-md-6">
+                    {!! Form::label('difficulty_level', 'Difficulty level:', ['class' => 'control-label']) !!}
+                    {!! Form::select('difficulty_level', ['easy' => 'Easy', 'normal' => 'Normal', 'hard' => 'Hard'], '', ['class' => 'form-control']) !!}                    
+                </div>
             </div>  
             <div class="row" style='margin-top:10px;'>
                 <div class="col-md-12">
@@ -58,7 +56,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" id='deleteSelectedQuestion' class="btn btn-sm btn-danger" onclick="deleteSelectedQuestion()">Delete</button>
+        <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedQuestion()">Delete</button>
         <button type="button" class="btn btn-sm btn-success" onclick="saveQuestion()">Save</button>
       </div>
     </div>
@@ -69,12 +67,12 @@
 <div class="modal fade" id="answerModal" tabindex="-1" role="dialog" aria-labelledby="answerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
-        <div class="modal-header">
+        {{-- <div class="modal-header">
           <h5 class="modal-title" id="answerModalLabel">Answer</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-        </div>
+        </div> --}}
         <div class="modal-body">
             <form name="questionDetail">
                 <div class="row">
@@ -99,7 +97,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" id='deleteSelectedAnswer' class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
+            <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
             <button type="button" class="btn btn-sm btn-success" onclick="saveAnswer()">Save</button>
           </div>        
       </div>
@@ -137,19 +135,21 @@
         selectedAnswerIndex = -1;
         selectedAnswer = undefined
         $('#questionModal textarea[name=question]').val('')
-        $('#questionModal textarea[name=remarks]').val('')
+        $('#questionModal select[name=difficulty_level]').val('normal')
         $('#questionModal select[name=randomly_display_answers]').val('no')
 
         selectedQuestion = questionnaires[id];
         if(undefined!=selectedQuestion) {
             $('#questionModal textarea[name=question]').val(selectedQuestion.question)
-            $('#questionModal textarea[name=remarks]').val(selectedQuestion.remarks)
+            $('#questionModal select[name=difficulty_level]').val(selectedQuestion.difficulty_level)
             $('#questionModal select[name=randomly_display_answers]').val(selectedQuestion.randomly_display_answers)            
         } else {
-            selectedQuestion = {'question':'', 'remarks':'', 'randomly_display_answers':'no', 'answers':[]};
+            selectedQuestion = {'question':'', 'difficulty_level':'normal', 'randomly_display_answers':'no', 'answers':[]};
         }
-        loadAnswers();
+        loadAnswers();        
         $('#questionModal').modal('show');
+        $('#questionModal textarea[name=question]').focus();
+
     }
 
     function loadAnswers(){
@@ -170,7 +170,7 @@
     function saveQuestion(){
         var data = {
             'question': $('#questionModal textarea[name=question]').val(),
-            'remarks': $('#questionModal textarea[name=remarks]').val(),
+            'difficulty_level': $('#questionModal select[name=difficulty_level]').val(),
             'randomly_display_answers':$('#questionModal select[name=randomly_display_answers]').val(),
             'answers': selectedQuestion.answers
         };
@@ -189,10 +189,27 @@
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
             console.log(data);
+            questionnaires = data;
+            loadQuestionnaires();
+            $('#questionModal').modal('hide');        
         });
+        
+    }
 
-        // $('#questionModal').modal('hide');
-        // loadQuestionnaires();
+    // Delete selectedQuestion
+    function deleteSelectedQuestion(){
+        if(!confirm('Are you sure you want to delete this question?')) return;
+
+        $.ajax({
+            url: '/admin/reviewers/{{ $reviewerId }}/question/' + selectedQuestion.id,
+            method: 'DELETE',
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
+        }).then(function(data){
+            console.log(data);
+            questionnaires = data;
+            loadQuestionnaires();
+            $('#questionModal').modal('hide');
+        });                
     }
 
     function openAnswerDetail(id){
@@ -208,6 +225,13 @@
             $('#answerModal select[name=is_correct]').val(selectedAnswer.is_correct)
         }
         $('#answerModal').modal('show');
+        $('#answerModal textarea[name=answer]').focus();
+    }
+
+    function deleteSelectedAnswer(){
+        selectedQuestion.answers.splice(selectedAnswerIndex,1);
+        loadAnswers();
+        $('#answerModal').modal('hide');
     }
 
     function saveAnswer(){
