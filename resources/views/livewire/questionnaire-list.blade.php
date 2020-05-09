@@ -56,7 +56,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedQuestion()">Delete</button>
+        <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionBtn'onclick="deleteSelectedQuestion()">Delete</button>
         <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
       </div>
     </div>
@@ -204,6 +204,8 @@
     function deleteSelectedQuestion(){
         if(!confirm('Are you sure you want to delete this question?')) return;
 
+        $('#deleteQuestionBtn').html("Deleting...");
+        $('#deleteQuestionBtn').addClass('disabled');
         $.ajax({
             url: '/admin/reviewers/{{ $reviewerId }}/question/' + selectedQuestion.id,
             method: 'DELETE',
@@ -212,6 +214,8 @@
             console.log(data);
             questionnaires = data;
             loadQuestionnaires();
+            $('#deleteQuestionBtn').html("Delete");
+            $('#deleteQuestionBtn').removeClass('disabled');            
             $('#questionModal').modal('hide');
         });                
     }
