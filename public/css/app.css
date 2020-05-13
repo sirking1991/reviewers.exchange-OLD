@@ -10890,3 +10890,7 @@ a.text-dark:focus {
   margin-bottom: 10px;
 }
 
+.modal {
+  overflow-y: auto;
+}
+

@@ -218,6 +218,9 @@
             selector: '.wysiwyg',
             plugins: 'casechange linkchecker autolink lists checklist media mediaembed pageembed powerpaste table advtable tinymcespellchecker',
             toolbar_mode: 'floating',
+            forced_root_block : '',
+            force_br_newlines : true,
+            force_p_newlines : false,
         });        
        
     });
@@ -309,7 +312,6 @@
             'randomly_display_answers':$('#questionModal select[name=randomly_display_answers]').val(),
             'answers': selectedQuestion.answers
         };
-        console.log(data);
         if(-1==selectedQuestionIndex) {
             questionnaires.push(data);
         } else {
@@ -345,7 +347,6 @@
             data: formData,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            console.log(data);
             questionnaires = data;
             loadQuestionnaires();
             $('#saveQuestionBtn').html("Save");
@@ -367,7 +368,6 @@
             method: 'DELETE',
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            console.log(data);
             questionnaires = data;
             loadQuestionnaires();
             $('#deleteQuestionBtn').html("Delete");
@@ -434,7 +434,6 @@
         if (undefined != data.remove_image && 'yes' == data.remove_image) {
             data.remove_image = 'yes';
         }
-        console.log(data);
         if (-1==selectedAnswerIndex) {
             // new answer
             selectedQuestion.answers.push(data);
@@ -518,7 +517,6 @@
             dataType: 'json',       
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            console.log(data);
             questionnaireGroups = data;
             loadQuestionnaireGroups();
             $('#saveQuestionnaireGroupBtn').html("Save");
@@ -538,7 +536,6 @@
             method: 'DELETE',
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            console.log(data);
             questionnaireGroups = data;
             loadQuestionnaireGroups();
             $('#deleteQuestionnaireGroupBtn').html("Delete");
