@@ -266,7 +266,7 @@
                         type='button' 
                         class='list-group-item list-group-item-action '>` + 
                         ('yes'==answer.is_correct ? '&#10004;' : '&#10060;') + ` ` + answer.answer + 
-                        (''!=answer.image ? 
+                        (''!=answer.image && undefined != answer.image ? 
                             `<img class='float-right' height='60px' src='{!! env('AWS_S3_URL') !!}`+answer.image+`'/>` 
                             : ``) 
                         +
@@ -467,7 +467,7 @@
 
     function saveQuestionnaireGroup() {
         
-        var id = -1==selectedQuestionIndex ? selectedQuestionnaireGroup.id : 0;
+        var id = -1 != selectedQuestionnaireGroupIndex ? selectedQuestionnaireGroup.id : 0;
 
         var data = {
             'id': id,
