@@ -233,9 +233,9 @@ class ReviewerController extends Controller
     }
 
     private function uploadImage(String $fileUnder, $image)
-    {
+    {        
         try {
-            return Storage::disk('s3')->put('images/' . $fileUnder, $image, 'public');
+            return Storage::disk('s3')->put(env('APP_ENV') . '/' . $fileUnder, $image, 'public');
         } catch (\Exception $e) {
             throw new \Exception("Error uploading image: " . $e->getMessage());
         }
