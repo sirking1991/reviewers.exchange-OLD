@@ -39,6 +39,14 @@
 <div class="modal fade" id="questionnaireGroupModal" tabindex="-1" role="dialog" aria-labelledby="questionnaireGroupLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
+        <div class="modal-header">
+            &nbsp;
+            <div class="float-right">
+                <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionnaireGroupBtn' onclick="deleteSelectedQuestionnaireGroup()">Delete</button>
+                <button type="button" class="btn btn-sm btn-success" id='saveQuestionnaireGroupBtn' onclick="saveQuestionnaireGroup()">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
         <div class="modal-body">
             <form name="questionnaireGroupDetail">
                 <div class="row">
@@ -49,8 +57,8 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        {!! Form::label('content', 'Content:', ['class' => 'control-label']) !!}
-                        {!! Form::textarea('content', '' , ['class' => 'form-control', 'rows'=>'2']) !!}                                                
+                        {!! Form::label('groupContent', 'Content:', ['class' => 'control-label']) !!}
+                        {!! Form::textarea('groupContent', '' , ['class' => 'form-control wysiwyg', 'rows'=>'2']) !!}                                                
                     </div>
                 </div>
                 <div class="row">
@@ -60,12 +68,7 @@
                     </div>
                 </div>                
             </form>
-        </div>
-        <div class="modal-footer">            
-            <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionnaireGroupBtn' onclick="deleteSelectedQuestionnaireGroup()">Delete</button>
-            <button type="button" class="btn btn-sm btn-success" id='saveQuestionnaireGroupBtn' onclick="saveQuestionnaireGroup()">Save</button>
-            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-          </div>        
+        </div>       
       </div>
     </div>
 </div>
@@ -74,6 +77,14 @@
 <div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
+        <div class="modal-header">
+            &nbsp;
+            <div class="float-right">
+                <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionBtn'onclick="deleteSelectedQuestion()">Delete</button>
+                <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
       <div class="modal-body">        
             <div class="row">
                 <div class="col-md-12">
@@ -84,7 +95,7 @@
             <div class="row">
                 <div class="col-md-12">
                     {!! Form::label('Question', 'Question:', ['class' => 'control-label']) !!}
-                    {!! Form::textarea('question', '' , ['class' => 'form-control', 'rows'=>'3']) !!}                
+                    {!! Form::textarea('question', '' , ['class' => 'form-control wysiwyg', 'rows'=>'3']) !!}                
                 </div>
             </div>
             <div class="row">
@@ -127,11 +138,6 @@
                 </div>
             </div>                  
       </div>
-      <div class="modal-footer">        
-        <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionBtn'onclick="deleteSelectedQuestion()">Delete</button>
-        <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
-        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-      </div>
     </div>
   </div>
 </div>
@@ -140,12 +146,20 @@
 <div class="modal fade" id="answerModal" tabindex="-1" role="dialog" aria-labelledby="answerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
+        <div class="modal-header">
+            &nbsp;
+            <div class="float-right">
+                <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
+                <button type="button" class="btn btn-sm btn-success" onclick="saveAnswer()">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
         <div class="modal-body">
             <form name="questionDetail">
                 <div class="row">
                     <div class="col-md-12">
                         {!! Form::label('answer', 'Answer:', ['class' => 'control-label']) !!}
-                        {!! Form::textarea('answer', '' , ['class' => 'form-control', 'rows'=>'2']) !!}                        
+                        {!! Form::textarea('answer', '' , ['class' => 'form-control wysiwyg', 'rows'=>'2']) !!}                        
                     </div>
                 </div>
                 <div class="row">
@@ -174,18 +188,14 @@
                     </div>
                 </div>                
             </form>
-        </div>
-        <div class="modal-footer">            
-            <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
-            <button type="button" class="btn btn-sm btn-success" onclick="saveAnswer()">Save</button>
-            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-          </div>        
+        </div>      
       </div>
     </div>
 </div>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+@section('scripts')
 <script>
     var questionnaires = {!! $questionnaires !!};
 
@@ -199,12 +209,21 @@
     var selectedAnswerIndex;
     var selectedAnswer;
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() 
+    {
         loadQuestionnaires();
         loadQuestionnaireGroups();
+
+        questionEditor = tinymce.init({
+            selector: '.wysiwyg',
+            plugins: 'casechange linkchecker autolink lists checklist media mediaembed pageembed powerpaste table advtable tinymcespellchecker',
+            toolbar_mode: 'floating',
+        });        
+       
     });
 
-    function loadQuestionnaires(){        
+    function loadQuestionnaires()
+    {        
         var html = '';
         for (let i = 0; i < questionnaires.length; i++) {
             const question = questionnaires[i];
@@ -217,13 +236,17 @@
         $('div#questionList').html(html);
     }
 
-    function openQuestionDetail(id){
+    function openQuestionDetail(id)
+    {
+        $('#questionModal').modal('show');
+
         selectedQuestionIndex = id;
         selectedAnswerIndex = -1;
         selectedAnswer = undefined
 
         $('#questionModal select[name=questionnaire_group_id]').val('0')
         $('#questionModal textarea[name=question]').val('')
+        tinymce.get('question').setContent('');
         $('#questionModal select[name=difficulty_level]').val('normal')
         $('#questionModal select[name=randomly_display_answers]').val('no')
 
@@ -236,6 +259,7 @@
         if(undefined!=selectedQuestion) {
             $('#questionModal select[name=questionnaire_group_id]').val(selectedQuestion.questionnaire_group_id);
             $('#questionModal textarea[name=question]').val(selectedQuestion.question);
+            tinymce.get('question').setContent(selectedQuestion.question);
             $('#questionModal select[name=difficulty_level]').val(selectedQuestion.difficulty_level);
             $('#questionModal select[name=randomly_display_answers]').val(selectedQuestion.randomly_display_answers);
             if('' != selectedQuestion.image) {
@@ -247,17 +271,18 @@
             selectedQuestion = {'question':'', 'difficulty_level':'normal', 'randomly_display_answers':'no', 'answers':[]};
         }
         loadAnswers();        
-        $('#questionModal').modal('show');
         $('#questionModal textarea[name=question]').focus();
 
     }
 
-    function removeQuestionImg() {
+    function removeQuestionImg() 
+    {
         $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val('yes');
         $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();
     }
 
-    function loadAnswers(){
+    function loadAnswers()
+    {
         var html = '';
         for (let i = 0; i < selectedQuestion.answers.length; i++) {
             const answer = selectedQuestion.answers[i];
@@ -279,12 +304,12 @@
     {
         var data = {
             'questionnaire_group_id': $('#questionModal select[name=questionnaire_group_id]').val(),
-            'question': $('#questionModal textarea[name=question]').val(),
+            'question': tinymce.get('question').getContent(),
             'difficulty_level': $('#questionModal select[name=difficulty_level]').val(),
             'randomly_display_answers':$('#questionModal select[name=randomly_display_answers]').val(),
             'answers': selectedQuestion.answers
         };
-
+        console.log(data);
         if(-1==selectedQuestionIndex) {
             questionnaires.push(data);
         } else {
@@ -297,7 +322,7 @@
 
         var formData = new FormData();        
         formData.append('questionnaire_group_id', $('#questionModal select[name=questionnaire_group_id]').val());
-        formData.append('question', $('#questionModal textarea[name=question]').val());
+        formData.append('question', tinymce.get('question').getContent());
         formData.append('difficulty_level', $('#questionModal select[name=difficulty_level]').val());
         formData.append('randomly_display_answers', $('#questionModal select[name=randomly_display_answers]').val());
         formData.append('answers', JSON.stringify(selectedQuestion.answers));
@@ -355,6 +380,7 @@
     {
         selectedAnswerIndex=id;
         $('#answerModal textarea[name=answer]').val('');
+        tinymce.get('answer').setContent('');
         $('#answerModal textarea[name=answer_explanation]').val('');
         $('#answerModal select[name=is_correct]').val('no')
 
@@ -366,6 +392,7 @@
         selectedAnswer = selectedQuestion.answers[id];
         if(undefined!=selectedAnswer){
             $('#answerModal textarea[name=answer]').val(selectedAnswer.answer);
+            tinymce.get('answer').setContent(selectedAnswer.answer);
             $('#answerModal textarea[name=answer_explanation]').val(selectedAnswer.answer_explanation);
             $('#answerModal select[name=is_correct]').val(selectedAnswer.is_correct)
             if(undefined != selectedAnswer.image && '' != selectedAnswer.image) {
@@ -397,7 +424,7 @@
                     ? selectedAnswer 
                     : {answer:'', answer_explanation:'', is_correct:'no', remove_image:'no'};
 
-        data.answer = $('#answerModal textarea[name=answer]').val()
+        data.answer = tinymce.get('answer').getContent();
         data.answer_explanation = $('#answerModal textarea[name=answer_explanation]').val();
         data.is_correct = $('#answerModal select[name=is_correct]').val();              
 
@@ -421,7 +448,8 @@
 
     }    
 
-    function loadQuestionnaireGroups(){        
+    function loadQuestionnaireGroups()
+    {        
         var html = '';
         var options = `<option value='0'>None</option>`;
         for (let i = 0; i < questionnaireGroups.length; i++) {
@@ -444,35 +472,40 @@
 
     }
 
-    function openQuestionnaireGroupList() {
+    function openQuestionnaireGroupList() 
+    {
         $('#questionnaireGroupListModal').modal('show');
     }
 
-    function openQuestionnaireGroupDetail(id){
+    function openQuestionnaireGroupDetail(id)
+    {
         selectedQuestionnaireGroupIndex=id;
         $('#questionnaireGroupModal input[name=name]').val('');
-        $('#questionnaireGroupModal textarea[name=content]').val('');
+        $('#questionnaireGroupModal textarea[name=groupContent]').val('');
+        tinymce.get('groupContent').setContent('');
         $('#questionnaireGroupModal select[name=randomly_display_questions]').val('no')
         
         selectedQuestionnaireGroup = questionnaireGroups[id];
         
         if(undefined!=selectedQuestionnaireGroup){
             $('#questionnaireGroupModal input[name=name]').val(selectedQuestionnaireGroup.name);
-            $('#questionnaireGroupModal textarea[name=content]').val(selectedQuestionnaireGroup.content);
+            $('#questionnaireGroupModal textarea[name=groupContent]').val(selectedQuestionnaireGroup.content);
+            tinymce.get('groupContent').setContent(selectedQuestionnaireGroup.content);
             $('#questionnaireGroupModal select[name=randomly_display_questions]').val(selectedQuestionnaireGroup.randomly_display_questions)
         }
         $('#questionnaireGroupModal').modal('show');
         $('#questionnaireGroupModal input[name=name]').focus();
     }   
 
-    function saveQuestionnaireGroup() {
+    function saveQuestionnaireGroup() 
+    {
         
         var id = -1 != selectedQuestionnaireGroupIndex ? selectedQuestionnaireGroup.id : 0;
 
         var data = {
             'id': id,
             'name': $('#questionnaireGroupModal input[name=name]').val(),
-            'content': $('#questionnaireGroupModal textarea[name=content]').val(),
+            'content': tinymce.get('groupContent').getContent(),
             'randomly_display_questions':$('#questionnaireGroupModal select[name=randomly_display_questions]').val(),
         };
 
@@ -494,7 +527,8 @@
         });        
     }
     
-   function deleteSelectedQuestionnaireGroup() {
+   function deleteSelectedQuestionnaireGroup() 
+   {
         if(!confirm('Are you sure you want to delete this question?')) return;
 
         $('#deleteQuestionnaireGroupBtn').html("Deleting...");
@@ -513,3 +547,5 @@
         });       
    }  
 </script>
+
+@endsection
