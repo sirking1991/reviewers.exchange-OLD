@@ -16,15 +16,18 @@
                             <a class="nav-link" href="{{ route('/admin/reviewers/list') }}">{{ __('Reviewers') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="">{{ __('Users') }}</a>
+                            <a class="nav-link" href="">{{ __('Reviewer sales') }}</a>
                         </li>
-                        <li class="nav-item dropdown">
+                        <li class="nav-item">
+                            <a class="nav-link" href="">{{ __('Exams taken') }}</a>
+                        </li>
+                        {{-- <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="#">Reviewer sales</a>
                                 <a class="dropdown-item" href="#">Exams taken</a>
                             </div>
-                        </li>
+                        </li> --}}
                     </ul>                
                 @endif
             @endauth

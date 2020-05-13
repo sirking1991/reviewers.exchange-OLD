@@ -69,6 +69,7 @@
             <div class="col-12">
                 @if (0 != $id)
                     <livewire:questionnaire-list :reviewer_id="$record->id"/>
+                    {{-- <x-questionnaire-list :reviewer_id="$record->id"> --}}
                 @else
                     <span class='font-italic text-muted'>The questionnaires will appear after you've save this reviewer.</span>
                 @endif

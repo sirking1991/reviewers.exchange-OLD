@@ -3,7 +3,8 @@
         <div class="card-header">
             Questionnaires ({{ count($questionnaires) }} questions)
             <div class="float-right">
-                <input onclick=" openQuestionDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire">
+                <input onclick="openQuestionnaireGroupList()" type="button" class="btn btn-sm btn-secondary" value="Questionnaire groups">
+                <input onclick="openQuestionDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire">
             </div>            
         </div>
         <div class="card-body">
@@ -12,20 +13,84 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="questionnaireGroupListModal" tabindex="-1" role="dialog" aria-labelledby="questionnaireGroupListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+          <div class="modal-body">
+                <div class="card">
+                    <div class="card-header">
+                        Questionnaire groups
+                        <div class="float-right">                            
+                            <input onclick=" openQuestionnaireGroupDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire group">
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                        </div>                             
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group" id='questionnaireGroupList'></div>
+                    </div>                  
+                </div>
+          </div>
+      </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="questionnaireGroupModal" tabindex="-1" role="dialog" aria-labelledby="questionnaireGroupLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+            <form name="questionnaireGroupDetail">
+                <div class="row">
+                    <div class="col-md-12">
+                        {!! Form::label('name', 'Group name:', ['class' => 'control-label']) !!}
+                        {!! Form::text('name', '' , ['class' => 'form-control']) !!}                        
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        {!! Form::label('content', 'Content:', ['class' => 'control-label']) !!}
+                        {!! Form::textarea('content', '' , ['class' => 'form-control', 'rows'=>'2']) !!}                                                
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        {!! Form::label('randomly_display_questions', 'Randomly display questions:', ['class' => 'control-label']) !!}
+                        {!! Form::select('randomly_display_questions', ['yes' => 'Yes', 'no' => 'No'], '', ['class' => 'form-control']) !!}
+                    </div>
+                </div>                
+            </form>
+        </div>
+        <div class="modal-footer">            
+            <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionnaireGroupBtn' onclick="deleteSelectedQuestionnaireGroup()">Delete</button>
+            <button type="button" class="btn btn-sm btn-success" id='saveQuestionnaireGroupBtn' onclick="saveQuestionnaireGroup()">Save</button>
+            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+          </div>        
+      </div>
+    </div>
+</div>
+
+
 <div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
-      {{-- <div class="modal-header">
-        <h5 class="modal-title" id="questionModalLabel">Question</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div> --}}
       <div class="modal-body">        
+            <div class="row">
+                <div class="col-md-12">
+                    {!! Form::label('questionnaire_group_id', 'Question group:', ['class' => 'control-label']) !!}
+                    {!! Form::select('questionnaire_group_id', [], '', ['class' => 'form-control']) !!}                    
+                </div>
+            </div>          
             <div class="row">
                 <div class="col-md-12">
                     {!! Form::label('Question', 'Question:', ['class' => 'control-label']) !!}
                     {!! Form::textarea('question', '' , ['class' => 'form-control', 'rows'=>'3']) !!}                
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    {!! Form::label('image', 'Image:', ['class' => 'control-label']) !!}
+                    {!! Form::file('image', ['class' => 'form-control', 'accept' => 'image/*']) !!}          
                 </div>
             </div>
             <div class="row">
@@ -54,10 +119,10 @@
                 </div>
             </div>                  
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+      <div class="modal-footer">        
         <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionBtn'onclick="deleteSelectedQuestion()">Delete</button>
         <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -67,12 +132,6 @@
 <div class="modal fade" id="answerModal" tabindex="-1" role="dialog" aria-labelledby="answerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
-        {{-- <div class="modal-header">
-          <h5 class="modal-title" id="answerModalLabel">Answer</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div> --}}
         <div class="modal-body">
             <form name="questionDetail">
                 <div class="row">
@@ -95,10 +154,10 @@
                 </div>                
             </form>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+        <div class="modal-footer">            
             <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
             <button type="button" class="btn btn-sm btn-success" onclick="saveAnswer()">Save</button>
+            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
           </div>        
       </div>
     </div>
@@ -108,13 +167,20 @@
 
 <script>
     var questionnaires = {!! $questionnaires !!};
+
+    var questionnaireGroups = {!! $questionnaireGroups !!};
+    var selectedQuestionnaireGroupIndex;
+    var selectedQuestionnaireGroup;
+
     var selectedQuestionIndex;
-    var selectedQuestion;
+    var selectedQuestion;    
+
     var selectedAnswerIndex;
     var selectedAnswer;
 
     document.addEventListener("DOMContentLoaded", function() {
         loadQuestionnaires();
+        loadQuestionnaireGroups();
     });
 
     function loadQuestionnaires(){        
@@ -134,15 +200,18 @@
         selectedQuestionIndex = id;
         selectedAnswerIndex = -1;
         selectedAnswer = undefined
+
+        $('#questionModal select[name=questionnaire_group_id]').val('0')
         $('#questionModal textarea[name=question]').val('')
         $('#questionModal select[name=difficulty_level]').val('normal')
         $('#questionModal select[name=randomly_display_answers]').val('no')
 
         selectedQuestion = questionnaires[id];
         if(undefined!=selectedQuestion) {
-            $('#questionModal textarea[name=question]').val(selectedQuestion.question)
-            $('#questionModal select[name=difficulty_level]').val(selectedQuestion.difficulty_level)
-            $('#questionModal select[name=randomly_display_answers]').val(selectedQuestion.randomly_display_answers)            
+            $('#questionModal select[name=questionnaire_group_id]').val(selectedQuestion.questionnaire_group_id);
+            $('#questionModal textarea[name=question]').val(selectedQuestion.question);
+            $('#questionModal select[name=difficulty_level]').val(selectedQuestion.difficulty_level);
+            $('#questionModal select[name=randomly_display_answers]').val(selectedQuestion.randomly_display_answers);
         } else {
             selectedQuestion = {'question':'', 'difficulty_level':'normal', 'randomly_display_answers':'no', 'answers':[]};
         }
@@ -169,6 +238,7 @@
 
     function saveQuestion(){
         var data = {
+            'questionnaire_group_id': $('#questionModal select[name=questionnaire_group_id]').val(),
             'question': $('#questionModal textarea[name=question]').val(),
             'difficulty_level': $('#questionModal select[name=difficulty_level]').val(),
             'randomly_display_answers':$('#questionModal select[name=randomly_display_answers]').val(),
@@ -242,7 +312,8 @@
         $('#answerModal').modal('hide');
     }
 
-    function saveAnswer(){
+    function saveAnswer()
+    {
         var data = {
                 'answer': $('#answerModal textarea[name=answer]').val(),
                 'answer_explanation': $('#answerModal textarea[name=answer_explanation]').val(),
@@ -260,4 +331,96 @@
         loadAnswers();
 
     }    
+
+    function loadQuestionnaireGroups(){        
+        var html = '';
+        var options = `<option value='0'>None</option>`;
+        for (let i = 0; i < questionnaireGroups.length; i++) {
+            const group = questionnaireGroups[i];
+            html = html +  `
+                <button onclick="openQuestionnaireGroupDetail(` + i + `)" type="button" class="list-group-item list-group-item-action">
+                    ` + group.name + `
+                </button>
+            `;                
+
+            options = options + `
+                <option value='` + group.id + `'>` + group.name + `</option>
+            `;
+        };
+        $('div#questionnaireGroupList').html(html);
+
+        // update questionGroup selection in questionnaireModal
+        $('#questionnaire_group_id').html(options);
+
+
+    }
+
+    function openQuestionnaireGroupList() {
+        $('#questionnaireGroupListModal').modal('show');
+    }
+
+    function openQuestionnaireGroupDetail(id){
+        selectedQuestionnaireGroupIndex=id;
+        $('#questionnaireGroupModal input[name=name]').val('');
+        $('#questionnaireGroupModal textarea[name=content]').val('');
+        $('#questionnaireGroupModal select[name=randomly_display_questions]').val('no')
+        
+        selectedQuestionnaireGroup = questionnaireGroups[id];
+        
+        if(undefined!=selectedQuestionnaireGroup){
+            $('#questionnaireGroupModal input[name=name]').val(selectedQuestionnaireGroup.name);
+            $('#questionnaireGroupModal textarea[name=content]').val(selectedQuestionnaireGroup.content);
+            $('#questionnaireGroupModal select[name=randomly_display_questions]').val(selectedQuestionnaireGroup.randomly_display_questions)
+        }
+        $('#questionnaireGroupModal').modal('show');
+        $('#questionnaireGroupModal input[name=name]').focus();
+    }   
+
+    function saveQuestionnaireGroup() {
+        
+        var id = -1==selectedQuestionIndex ? selectedQuestionnaireGroup.id : 0;
+
+        var data = {
+            'id': id,
+            'name': $('#questionnaireGroupModal input[name=name]').val(),
+            'content': $('#questionnaireGroupModal textarea[name=content]').val(),
+            'randomly_display_questions':$('#questionnaireGroupModal select[name=randomly_display_questions]').val(),
+        };
+
+        $('#saveQuestionnaireGroupBtn').html("Saving...");
+        $('#saveQuestionnaireGroupBtn').addClass('disabled');
+        $.ajax({
+            url: '/admin/reviewers/{{ $reviewerId }}/questionnaire-group/' + id,
+            method: 'POST',
+            data: data,
+            dataType: 'json',       
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
+        }).then(function(data){
+            console.log(data);
+            questionnaireGroups = data;
+            loadQuestionnaireGroups();
+            $('#saveQuestionnaireGroupBtn').html("Save");
+            $('#saveQuestionnaireGroupBtn').removeClass('disabled');            
+            $('#questionnaireGroupModal').modal('hide');        
+        });        
+    }
+    
+   function deleteSelectedQuestionnaireGroup() {
+        if(!confirm('Are you sure you want to delete this question?')) return;
+
+        $('#deleteQuestionnaireGroupBtn').html("Deleting...");
+        $('#deleteQuestionnaireGroupBtn').addClass('disabled');
+        $.ajax({
+            url: '/admin/reviewers/{{ $reviewerId }}/questionnaire-group/' + selectedQuestionnaireGroup.id,
+            method: 'DELETE',
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
+        }).then(function(data){
+            console.log(data);
+            questionnaireGroups = data;
+            loadQuestionnaireGroups();
+            $('#deleteQuestionnaireGroupBtn').html("Delete");
+            $('#deleteQuestionnaireGroupBtn').removeClass('disabled');            
+            $('#questionnaireGroupModal').modal('hide');
+        });       
+   }  
 </script>

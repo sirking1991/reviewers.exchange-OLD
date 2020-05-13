@@ -25,10 +25,14 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::middleware(['checkifadmin'])->group(function () {
     Route::get('/admin/reviewers/list', 'ReviewerController@adminList')->name('/admin/reviewers/list');
     Route::get('/admin/reviewers/{id?}', 'ReviewerController@adminShow');
-    Route::match(['post', 'put'], '/admin/reviewers/{id?}', 'ReviewerController@save');
+    Route::match(['post', 'put'], '/admin/reviewers/{id?}', 'ReviewerController@save');    
     Route::get('/admin/reviewers/{id}/delete', 'ReviewerController@delete');
+    
     Route::match(['post', 'put'], '/admin/reviewers/{reviewerId}/question/{id?}', 'ReviewerController@saveQuestion');
     Route::match(['delete'], '/admin/reviewers/{reviewerId}/question/{id?}', 'ReviewerController@deleteQuestion');
-
+    
+    Route::get('/admin/reviewers/{reviewerId}/questionnaire-groups', 'ReviewerController@questionnaireGroups' );
+    Route::match(['post', 'put'], '/admin/reviewers/{reviewerId}/questionnaire-group/{id?}', 'ReviewerController@questionnaireGroupSave' );
+    Route::match(['delete'], '/admin/reviewers/{reviewerId}/questionnaire-group/{id}', 'ReviewerController@questionnaireGroupDelete' );
 });
 

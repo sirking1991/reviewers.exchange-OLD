@@ -9,12 +9,18 @@ class QuestionnaireList extends Component
 
     public $reviewerId;
     public $questionnaires;
+    public $questionnaireGroups;
 
     public function mount($reviewerId)
     {
         $this->reviewerId = $reviewerId;
 
-        $this->questionnaires = \App\Questionnaire::where('reviewer_id', $this->reviewerId)->with('answers')->get();
+        $this->questionnaires = \App\Questionnaire::where('reviewer_id', $this->reviewerId)
+            ->where('user_id', Auth()->user()->id)
+            ->with('answers')
+            ->get();
+
+        $this->questionnaireGroups = \App\QuestionnaireGroup::where('reviewer_id', $this->reviewerId)->get();
     }
 
     public function render()
@@ -22,7 +28,8 @@ class QuestionnaireList extends Component
         return view('livewire.questionnaire-list');
     }
 
-    public function openQuestionDetail($id) {
+    public function openQuestionDetail($id)
+    {
         return view('livewire.questionnaire-detail');
     }
 }
