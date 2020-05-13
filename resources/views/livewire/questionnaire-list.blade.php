@@ -39,6 +39,14 @@
 <div class="modal fade" id="questionnaireGroupModal" tabindex="-1" role="dialog" aria-labelledby="questionnaireGroupLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
+        <div class="modal-header">
+            &nbsp;
+            <div class="float-right">
+                <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionnaireGroupBtn' onclick="deleteSelectedQuestionnaireGroup()">Delete</button>
+                <button type="button" class="btn btn-sm btn-success" id='saveQuestionnaireGroupBtn' onclick="saveQuestionnaireGroup()">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>                
+            </div>
+        </div>
         <div class="modal-body">
             <form name="questionnaireGroupDetail">
                 <div class="row">
@@ -60,12 +68,7 @@
                     </div>
                 </div>                
             </form>
-        </div>
-        <div class="modal-footer">            
-            <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionnaireGroupBtn' onclick="deleteSelectedQuestionnaireGroup()">Delete</button>
-            <button type="button" class="btn btn-sm btn-success" id='saveQuestionnaireGroupBtn' onclick="saveQuestionnaireGroup()">Save</button>
-            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-          </div>        
+        </div>      
       </div>
     </div>
 </div>
@@ -74,6 +77,14 @@
 <div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
+        <div class="modal-header">
+            &nbsp;
+            <div class="float-right">
+        <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionBtn'onclick="deleteSelectedQuestion()">Delete</button>
+        <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>                
+            </div>
+        </div>
       <div class="modal-body">        
             <div class="row">
                 <div class="col-md-12">
@@ -127,11 +138,6 @@
                 </div>
             </div>                  
       </div>
-      <div class="modal-footer">        
-        <button type="button" class="btn btn-sm btn-danger" id='deleteQuestionBtn'onclick="deleteSelectedQuestion()">Delete</button>
-        <button type="button" class="btn btn-sm btn-success" id='saveQuestionBtn' onclick="saveQuestion()">Save</button>
-        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-      </div>
     </div>
   </div>
 </div>
@@ -140,6 +146,14 @@
 <div class="modal fade" id="answerModal" tabindex="-1" role="dialog" aria-labelledby="answerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
+        <div class="modal-header">
+            &nbsp;
+            <div class="float-right">
+                <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
+                <button type="button" class="btn btn-sm btn-success" onclick="saveAnswer()">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
         <div class="modal-body">
             <form name="questionDetail">
                 <div class="row">
@@ -175,11 +189,6 @@
                 </div>                
             </form>
         </div>
-        <div class="modal-footer">            
-            <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelectedAnswer()">Delete</button>
-            <button type="button" class="btn btn-sm btn-success" onclick="saveAnswer()">Save</button>
-            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-          </div>        
       </div>
     </div>
 </div>
