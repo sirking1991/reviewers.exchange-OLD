@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Reviewer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 
 class ReviewerController extends Controller
 {
@@ -104,16 +106,18 @@ class ReviewerController extends Controller
                 'reviewer_id' => $reviewerId,
                 'questionnaire_group_id' => $request->input('questionnaire_group_id') ?? '0',
                 'question' => $request->input('question') ?? '',
+                'image' => '',
                 'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
                 'difficulty_level' => $request->input('difficulty_level') ?? 'normal',
             ]);
             if (null != $request->input('answers')) {
-                foreach ($request->input('answers') as $answer) {
+                $answers = json_decode($request->input('answers'));
+                foreach ($answers  as $answer) {
                     \App\Answer::create([
                         'questionnaire_id' => $question->id,
-                        'answer' => $answer['answer'],
-                        'is_correct' => $answer['is_correct'],
-                        'answer_explanation' => $answer['answer_explanation'] ?? '',
+                        'answer' => $answer->answer,
+                        'is_correct' => $answer->is_correct,
+                        'answer_explanation' => $answer->answer_explanation ?? '',
                     ]);
                 }
             }
@@ -134,23 +138,24 @@ class ReviewerController extends Controller
             // update/create answers
             if (null != $request->input('answers') || 0 == count($request->input('answers'))) {
                 $updateDate = date('Y-m-d H:i:s');
-                foreach ($request->input('answers') as $answer) {
-                    if (isset($answer['id'])) {
+                $answers = json_decode($request->input('answers'));
+                foreach ($answers  as $answer) {
+                    if (isset($answer->id)) {
                         Log::debug('updating answer');
-                        \App\Answer::where('id', $answer['id'])
+                        \App\Answer::where('id', $answer->id)
                             ->update([
-                                'answer' => $answer['answer'] ?? '',
-                                'is_correct' => $answer['is_correct'] ?? 'no',
-                                'answer_explanation' => $answer['answer_explanation'] ?? '',
+                                'answer' => $answer->answer ?? '',
+                                'is_correct' => $answer->is_correct ?? 'no',
+                                'answer_explanation' => $answer->answer_explanation ?? '',
                                 'updated_at' => $updateDate,
                             ]);
                     } else {
                         Log::debug('creating new answer');
                         \App\Answer::create([
                             'questionnaire_id' => $questionId,
-                            'answer' => $answer['answer'] ?? '',
-                            'is_correct' => $answer['is_correct'] ?? 'no',
-                            'answer_explanation' => $answer['answer_explanation'] ?? '',
+                            'answer' => $answer->answer ?? '',
+                            'is_correct' => $answer->is_correct ?? 'no',
+                            'answer_explanation' => $answer->answer_explanation ?? '',
                         ]);
                     }
                 }
@@ -162,6 +167,42 @@ class ReviewerController extends Controller
                 // delete all existing answers
                 \App\Answer::where('questionnaire_id', $questionId)->delete();
             }
+        }
+
+        if (isset($request->remove_image) && 'yes' == $request->remove_image) {
+            Log::debug('deleting old s3 image:' . $question->image);
+            try {
+                Storage::disk('s3')->delete($question->image);
+                $question->image = '';
+                $question->save();                
+            } catch (\Throwable $th) {
+                Log::error('Old S3 file does not exist: ' . $question->image);
+            }
+        }
+
+        // if uploaded new file
+        if ("undefined" != $request->image) {
+            // delete existing file
+            if ('' != $question->image) {
+                Log::debug('deleting old s3 image:' . $question->image);
+                try {
+                    Storage::disk('s3')->delete($question->image);
+                } catch (\Throwable $th) {
+                    Log::error('Old S3 file does not exist: ' . $question->image);
+                }
+            }
+
+            // upload uploaded file
+            try {
+                $path = Storage::disk('s3')->put('images/questionnaire/' . $questionId, $request->image, 'public');
+                Log::debug('s3 storage path=' . $path);
+                // update question of new s3 file id
+                $question->image = $path;
+                $question->save();
+            } catch (\Exception $e) {
+                Log::error('Error upload image to S3:' . $e->getMessage() );
+            }
+
         }
 
         return \App\Questionnaire::where('user_id', Auth()->user()->id)
@@ -210,7 +251,7 @@ class ReviewerController extends Controller
                 'name' => $request->input('name') ?? '',
                 'content' => $request->input('content') ?? '',
                 'randomly_display_questions' => $request->input('randomly_display_questions') ?? 'no',
-            ]);            
+            ]);
         } else {
             Log::debug('updating question record');
             $questionGroup = \App\QuestionnaireGroup::where('user_id', Auth()->user()->id)
@@ -223,7 +264,7 @@ class ReviewerController extends Controller
                 'name' => $request->input('name') ?? '',
                 'content' => $request->input('content') ?? '',
                 'randomly_display_questions' => $request->input('randomly_display_questions') ?? 'no',
-            ]);          
+            ]);
         }
 
         return \App\QuestionnaireGroup::where('reviewer_id', $reviewerId)->get();
@@ -238,13 +279,13 @@ class ReviewerController extends Controller
             ->first();
 
         if (!$questionnaireGroup) return response('', 404);
-        
+
         $questionnaireGroup->delete();
 
         // remove group in question
         \App\Questionnaire::where('questionnaire_group_id', $questionnaireGroupId)
             ->where('reviewer_id', $reviewerId)
-            ->update(['questionnaire_group_id'=>0]);
+            ->update(['questionnaire_group_id' => 0]);
 
         return \App\QuestionnaireGroup::where('reviewer_id', $reviewerId)->get();
     }

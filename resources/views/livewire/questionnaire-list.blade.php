@@ -88,9 +88,17 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md">
                     {!! Form::label('image', 'Image:', ['class' => 'control-label']) !!}
                     {!! Form::file('image', ['class' => 'form-control', 'accept' => 'image/*']) !!}          
+                </div>
+                <div class="col-md existingImg">
+                    <label class="control-label">Existing image <input type='button' class="btn btn-sm btn-danger" onclick="removeQuestionImg()" value='Remove' /></label>
+                    <br/>
+                    <a href="#" target="question_img">
+                        <img height="64px" src="https://via.placeholder.com/100">
+                    </a>
+                    <input type="hidden" name='remove_image' >
                 </div>
             </div>
             <div class="row">
@@ -206,12 +214,22 @@
         $('#questionModal select[name=difficulty_level]').val('normal')
         $('#questionModal select[name=randomly_display_answers]').val('no')
 
+        $('#questionModal input[name=image]').val('')   // reset image file
+        $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val('no');
+
         selectedQuestion = questionnaires[id];
         if(undefined!=selectedQuestion) {
             $('#questionModal select[name=questionnaire_group_id]').val(selectedQuestion.questionnaire_group_id);
             $('#questionModal textarea[name=question]').val(selectedQuestion.question);
             $('#questionModal select[name=difficulty_level]').val(selectedQuestion.difficulty_level);
             $('#questionModal select[name=randomly_display_answers]').val(selectedQuestion.randomly_display_answers);
+            if('' != selectedQuestion.image) {
+                $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').show();
+                $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg a').attr('href', '{!! env('AWS_S3_URL') !!}' + selectedQuestion.image);
+                $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg a img').attr('src', '{!! env('AWS_S3_URL') !!}' + selectedQuestion.image)
+            } else {
+                $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();
+            }
         } else {
             selectedQuestion = {'question':'', 'difficulty_level':'normal', 'randomly_display_answers':'no', 'answers':[]};
         }
@@ -219,6 +237,11 @@
         $('#questionModal').modal('show');
         $('#questionModal textarea[name=question]').focus();
 
+    }
+
+    function removeQuestionImg() {
+        $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val('yes');
+        $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();
     }
 
     function loadAnswers(){
@@ -236,7 +259,8 @@
         $('div#answerList').html(html);
     }
 
-    function saveQuestion(){
+    function saveQuestion()
+    {
         var data = {
             'questionnaire_group_id': $('#questionModal select[name=questionnaire_group_id]').val(),
             'question': $('#questionModal textarea[name=question]').val(),
@@ -244,6 +268,7 @@
             'randomly_display_answers':$('#questionModal select[name=randomly_display_answers]').val(),
             'answers': selectedQuestion.answers
         };
+
         if(-1==selectedQuestionIndex) {
             questionnaires.push(data);
         } else {
@@ -253,11 +278,23 @@
         var questionId = undefined!=selectedQuestion.id ? selectedQuestion.id : 0;
         $('#saveQuestionBtn').html("Saving...");
         $('#saveQuestionBtn').addClass('disabled');
+
+        var formData = new FormData();        
+        formData.append('questionnaire_group_id', $('#questionModal select[name=questionnaire_group_id]').val());
+        formData.append('question', $('#questionModal textarea[name=question]').val());
+        formData.append('difficulty_level', $('#questionModal select[name=difficulty_level]').val());
+        formData.append('randomly_display_answers', $('#questionModal select[name=randomly_display_answers]').val());
+        formData.append('answers', JSON.stringify(selectedQuestion.answers));
+        formData.append('image', $('#questionModal input[name=image]')[0].files[0])
+        if('yes' == $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val() ) {
+            formData.append('remove_image', 'yes')
+        }            
         $.ajax({
             url: '/admin/reviewers/{{ $reviewerId }}/question/' + questionId,
             method: 'POST',
-            data: data,
-            dataType: 'json',       
+            processData: false,
+            contentType: false,
+            data: formData,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
             console.log(data);
