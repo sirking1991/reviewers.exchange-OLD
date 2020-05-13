@@ -96,7 +96,7 @@
                     <label class="control-label">Existing image <input type='button' class="btn btn-sm btn-danger" onclick="removeQuestionImg()" value='Remove' /></label>
                     <br/>
                     <a href="#" target="question_img">
-                        <img height="64px" src="https://via.placeholder.com/100">
+                        <img height="60px" src="https://via.placeholder.com/100">
                     </a>
                     <input type="hidden" name='remove_image' >
                 </div>
@@ -148,6 +148,19 @@
                         {!! Form::textarea('answer', '' , ['class' => 'form-control', 'rows'=>'2']) !!}                        
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md">
+                        {!! Form::label('image', 'Image:', ['class' => 'control-label']) !!}
+                        {!! Form::file('image', ['class' => 'form-control', 'accept' => 'image/*']) !!}          
+                    </div>
+                    <div class="col-md existingImg">
+                        <label class="control-label">Existing image <input type='button' class="btn btn-sm btn-danger" onclick="removeAnswerImg()" value='Remove' /></label>
+                        <br/>
+                        <a href="#" target="question_img">
+                            <img height="60px" src="https://via.placeholder.com/100">
+                        </a>
+                    </div>
+                </div>                
                 <div class="row">
                     <div class="col-md-12">
                         {!! Form::label('answer', 'Explanation:', ['class' => 'control-label']) !!}
@@ -216,7 +229,9 @@
 
         $('#questionModal input[name=image]').val('')   // reset image file
         $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val('no');
-
+        
+        $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();
+        
         selectedQuestion = questionnaires[id];
         if(undefined!=selectedQuestion) {
             $('#questionModal select[name=questionnaire_group_id]').val(selectedQuestion.questionnaire_group_id);
@@ -227,8 +242,6 @@
                 $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').show();
                 $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg a').attr('href', '{!! env('AWS_S3_URL') !!}' + selectedQuestion.image);
                 $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg a img').attr('src', '{!! env('AWS_S3_URL') !!}' + selectedQuestion.image)
-            } else {
-                $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();
             }
         } else {
             selectedQuestion = {'question':'', 'difficulty_level':'normal', 'randomly_display_answers':'no', 'answers':[]};
@@ -250,11 +263,14 @@
             const answer = selectedQuestion.answers[i];
             html = html +  `
                 <button onclick="openAnswerDetail(`+i+`)" 
-                        type="button" 
-                        class="list-group-item list-group-item-action ">` + 
-                        ('yes'==answer.is_correct?'&#10004; ':'&#10060') + ` ` +answer.answer + 
-                `</button>
-            `;                
+                        type='button' 
+                        class='list-group-item list-group-item-action '>` + 
+                        ('yes'==answer.is_correct ? '&#10004;' : '&#10060;') + ` ` + answer.answer + 
+                        (''!=answer.image ? 
+                            `<img class='float-right' height='60px' src='{!! env('AWS_S3_URL') !!}`+answer.image+`'/>` 
+                            : ``) 
+                        +
+                `</button>`;                
         };
         $('div#answerList').html(html);
     }
@@ -288,7 +304,14 @@
         formData.append('image', $('#questionModal input[name=image]')[0].files[0])
         if('yes' == $('#questionModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val() ) {
             formData.append('remove_image', 'yes')
-        }            
+        }
+        // attach answer images
+        for (let i = 0; i < selectedQuestion.answers.length; i++) {
+            const answer = selectedQuestion.answers[i];
+            if ('' != answer.image_for_upload) {
+                formData.append('answer_image_' + i, answer.image_for_upload);
+            }            
+        }
         $.ajax({
             url: '/admin/reviewers/{{ $reviewerId }}/question/' + questionId,
             method: 'POST',
@@ -308,7 +331,8 @@
     }
 
     // Delete selectedQuestion
-    function deleteSelectedQuestion(){
+    function deleteSelectedQuestion()
+    {
         if(!confirm('Are you sure you want to delete this question?')) return;
 
         $('#deleteQuestionBtn').html("Deleting...");
@@ -327,42 +351,70 @@
         });                
     }
 
-    function openAnswerDetail(id){
+    function openAnswerDetail(id)
+    {
         selectedAnswerIndex=id;
         $('#answerModal textarea[name=answer]').val('');
         $('#answerModal textarea[name=answer_explanation]').val('');
         $('#answerModal select[name=is_correct]').val('no')
+
+        $('#answerModal input[name=image]').val('')   // reset image file
+        $('#answerModal .modal-dialog .modal-content .modal-body .row .existingImg input[name=remove_image]').val('no');        
         
+        $('#answerModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();
+
         selectedAnswer = selectedQuestion.answers[id];
         if(undefined!=selectedAnswer){
             $('#answerModal textarea[name=answer]').val(selectedAnswer.answer);
             $('#answerModal textarea[name=answer_explanation]').val(selectedAnswer.answer_explanation);
             $('#answerModal select[name=is_correct]').val(selectedAnswer.is_correct)
+            if(undefined != selectedAnswer.image && '' != selectedAnswer.image) {
+                $('#answerModal .modal-dialog .modal-content .modal-body .row .existingImg').show();
+                $('#answerModal .modal-dialog .modal-content .modal-body .row .existingImg a').attr('href', '{!! env('AWS_S3_URL') !!}' + selectedAnswer.image);
+                $('#answerModal .modal-dialog .modal-content .modal-body .row .existingImg a img').attr('src', '{!! env('AWS_S3_URL') !!}' + selectedAnswer.image)
+            }            
         }
         $('#answerModal').modal('show');
         $('#answerModal textarea[name=answer]').focus();
     }
 
-    function deleteSelectedAnswer(){
+    function deleteSelectedAnswer()
+    {
         selectedQuestion.answers.splice(selectedAnswerIndex,1);
         loadAnswers();
         $('#answerModal').modal('hide');
     }
 
+    function removeAnswerImg() 
+    {
+        $('#answerModal .modal-dialog .modal-content .modal-body .row .existingImg').hide();        
+        selectedAnswer.remove_image = 'yes';
+    }
+
     function saveAnswer()
     {
-        var data = {
-                'answer': $('#answerModal textarea[name=answer]').val(),
-                'answer_explanation': $('#answerModal textarea[name=answer_explanation]').val(),
-                'is_correct': $('#answerModal select[name=is_correct]').val(),
-            };
-        if(-1==selectedAnswerIndex) {
+        var data = undefined != selectedAnswer 
+                    ? selectedAnswer 
+                    : {answer:'', answer_explanation:'', is_correct:'no', remove_image:'no'};
+
+        data.answer = $('#answerModal textarea[name=answer]').val()
+        data.answer_explanation = $('#answerModal textarea[name=answer_explanation]').val();
+        data.is_correct = $('#answerModal select[name=is_correct]').val();              
+
+        if (undefined != $('#answerModal input[name=image]')[0].files[0]) {
+            data.image_for_upload = $('#answerModal input[name=image]')[0].files[0];
+        }
+        if (undefined != data.remove_image && 'yes' == data.remove_image) {
+            data.remove_image = 'yes';
+        }
+        console.log(data);
+        if (-1==selectedAnswerIndex) {
             // new answer
             selectedQuestion.answers.push(data);
         } else {
             // updating existing order
             selectedQuestion.answers[selectedAnswerIndex]=data;
-        }
+        }        
         
         $('#answerModal').modal('hide');
         loadAnswers();

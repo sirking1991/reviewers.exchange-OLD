@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
+use PhpParser\Node\Expr\Cast\String_;
 
 class ReviewerController extends Controller
 {
@@ -112,13 +113,22 @@ class ReviewerController extends Controller
             ]);
             if (null != $request->input('answers')) {
                 $answers = json_decode($request->input('answers'));
-                foreach ($answers  as $answer) {
-                    \App\Answer::create([
+                foreach ($answers  as $index => $answer) {
+                    $ans = \App\Answer::create([
                         'questionnaire_id' => $question->id,
                         'answer' => $answer->answer,
                         'is_correct' => $answer->is_correct,
                         'answer_explanation' => $answer->answer_explanation ?? '',
                     ]);
+                    // check if image was attach to the answer
+                    if ('undefined' != $request->{'answer_image_' . $index}) {
+                        try {
+                            $ans->image = $this->uploadImage('images/answer/' . $ans->id, $request->{'answer_image_' . $index});
+                            $ans->save();
+                        } catch (\Exception $e) {
+                            Log::error($e->getMessage());
+                        }
+                    }
                 }
             }
         } else {
@@ -137,78 +147,107 @@ class ReviewerController extends Controller
             ]);
             // update/create answers
             if (null != $request->input('answers') || 0 == count($request->input('answers'))) {
-                $updateDate = date('Y-m-d H:i:s');
                 $answers = json_decode($request->input('answers'));
-                foreach ($answers  as $answer) {
+                $safeAnswerId = [];
+                foreach ($answers  as $index => $answer) {
                     if (isset($answer->id)) {
-                        Log::debug('updating answer');
                         \App\Answer::where('id', $answer->id)
                             ->update([
                                 'answer' => $answer->answer ?? '',
                                 'is_correct' => $answer->is_correct ?? 'no',
                                 'answer_explanation' => $answer->answer_explanation ?? '',
-                                'updated_at' => $updateDate,
                             ]);
+                        $answerId = $answer->id;
                     } else {
-                        Log::debug('creating new answer');
-                        \App\Answer::create([
+                        $answerModel = \App\Answer::create([
                             'questionnaire_id' => $questionId,
                             'answer' => $answer->answer ?? '',
                             'is_correct' => $answer->is_correct ?? 'no',
                             'answer_explanation' => $answer->answer_explanation ?? '',
                         ]);
+                        $answerId = $answerModel->id;
+                    }
+                    $safeAnswerId[] = $answerId;
+                    // remove answer image?
+                    if (isset($answer->remove_image) && 'yes' == $answer->remove_image) {
+                        try {
+                            $this->deleteImage($answer->image);
+                            \App\Answer::find($answerId)->update(['image' => '']);
+                        } catch (\Exception $e) {
+                            Log::error($e->getMessage());
+                        }
+                    }
+                    // check if image was attach to the answer
+                    if ('undefined' != $request->{'answer_image_' . $index}) {
+                        try {
+                            $path = $this->uploadImage('images/answer/' . $answerId, $request->{'answer_image_' . $index});
+                            \App\Answer::find($answerId)->update(['image' => $path]);
+                        } catch (\Exception $e) {
+                            Log::error($e->getMessage());
+                        }
                     }
                 }
                 // delete other answers that where not part of the answer submitted
-                \App\Answer::where('questionnaire_id', $questionId)
-                    ->where('updated_at', '!=', $updateDate)
-                    ->delete();
+                \App\Answer::where('questionnaire_id', $questionId)->whereNotIn('id', $safeAnswerId)->delete();
             } else {
                 // delete all existing answers
                 \App\Answer::where('questionnaire_id', $questionId)->delete();
             }
         }
 
+        // remove image?
         if (isset($request->remove_image) && 'yes' == $request->remove_image) {
-            Log::debug('deleting old s3 image:' . $question->image);
             try {
-                Storage::disk('s3')->delete($question->image);
+                $this->deleteImage($question->image);
                 $question->image = '';
-                $question->save();                
-            } catch (\Throwable $th) {
-                Log::error('Old S3 file does not exist: ' . $question->image);
+                $question->save();
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
             }
         }
 
         // if uploaded new file
-        if ("undefined" != $request->image) {
-            // delete existing file
+        if ('undefined' != $request->image) {
+            // delete existing file so we dont polute the s3 folder
             if ('' != $question->image) {
-                Log::debug('deleting old s3 image:' . $question->image);
                 try {
-                    Storage::disk('s3')->delete($question->image);
-                } catch (\Throwable $th) {
-                    Log::error('Old S3 file does not exist: ' . $question->image);
+                    $this->deleteImage($question->image);
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
                 }
             }
 
             // upload uploaded file
             try {
-                $path = Storage::disk('s3')->put('images/questionnaire/' . $questionId, $request->image, 'public');
-                Log::debug('s3 storage path=' . $path);
-                // update question of new s3 file id
-                $question->image = $path;
+                $question->image = $this->uploadImage('images/questionnaire/' . $questionId, $request->image);
                 $question->save();
             } catch (\Exception $e) {
-                Log::error('Error upload image to S3:' . $e->getMessage() );
+                Log::error($e->getMessage());
             }
-
         }
 
         return \App\Questionnaire::where('user_id', Auth()->user()->id)
             ->where('reviewer_id', $reviewerId)
             ->with('answers')
             ->get();
+    }
+
+    private function uploadImage(String $fileUnder, $image)
+    {
+        try {
+            return Storage::disk('s3')->put('images/' . $fileUnder, $image, 'public');
+        } catch (\Exception $e) {
+            throw new \Exception("Error uploading image: " . $e->getMessage());
+        }
+    }
+
+    private function deleteImage(String $image)
+    {
+        try {
+            Storage::disk('s3')->delete($image);
+        } catch (\Exception $e) {
+            throw new \Exception("Error deleting image: {$image} error=" . $e->getMessage());
+        }
     }
 
     public function deleteQuestion(String $reviewerId, String $questionId)
