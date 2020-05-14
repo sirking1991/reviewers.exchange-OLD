@@ -218,9 +218,38 @@
             selector: '.wysiwyg',
             plugins: 'casechange linkchecker autolink lists checklist media mediaembed pageembed powerpaste table advtable tinymcespellchecker',
             toolbar_mode: 'floating',
+            skin: 'bootstrap',
             forced_root_block : '',
             force_br_newlines : true,
             force_p_newlines : false,
+            setup: editor => {
+                // Apply the focus effect
+                editor.on("init", () => {
+                editor.getContainer().style.transition =
+                    "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out";
+                });
+                editor.on("focus", () => {
+                (editor.getContainer().style.boxShadow =
+                    "0 0 0 .2rem rgba(0, 123, 255, .25)"),
+                    (editor.getContainer().style.borderColor = "#80bdff");
+                });
+                editor.on("blur", () => {
+                (editor.getContainer().style.boxShadow = ""),
+                    (editor.getContainer().style.borderColor = "");
+                });
+            }            
+        });        
+        
+        // Prevent Bootstrap dialog from blocking focusin
+        // https://www.tiny.cloud/blog/bootstrap-wysiwyg-editor/
+        $(document).on("focusin", function(e) {
+            if (
+                $(e.target).closest(
+                ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root"
+                ).length
+            ) {
+                e.stopImmediatePropagation();
+            }
         });        
        
     });
