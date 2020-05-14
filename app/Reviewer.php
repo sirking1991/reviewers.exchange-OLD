@@ -13,5 +13,9 @@ class Reviewer extends Model
     
     public function questionnaireGroups() {
         return $this->hasMany('App\QuestionnaireGroups', 'reviewer_id');
-    }     
+    }  
+    
+    public function reviewerPurchases(){
+        return $this->hasMany('App\ReviewerPurchases');
+    }
 }

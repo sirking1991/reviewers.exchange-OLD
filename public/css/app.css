@@ -6189,7 +6189,7 @@ a.close.disabled {
 
 .modal.fade .modal-dialog {
   transition: transform 0.3s ease-out;
-  transform: translate(0, -50px);
+  transform: scale(0.2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6199,7 +6199,7 @@ a.close.disabled {
 }
 
 .modal.show .modal-dialog {
-  transform: none;
+  transform: scale(1);
 }
 
 .modal.modal-static .modal-dialog {
@@ -10892,5 +10892,60 @@ a.text-dark:focus {
 
 .modal {
   overflow-y: auto;
+}
+
+div.horizontal-scroll {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.glow-on-hover :hover {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: #80bdff;
+}
+
+div.horizontal-scroll div.card {
+  cursor: pointer;
+  width: 250px;
+  height: 350px;
+  display: inline-flex;
+  text-align: left;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+div.horizontal-scroll div.card img {
+  max-height: 150px;
+}
+
+.selling-price {
+  bottom: 0px;
+  position: absolute;
+}
+
+.wrapword {
+  overflow: hidden;
+  -webkit-hyphens: auto;
+      -ms-hyphens: auto;
+          hyphens: auto;
+  white-space: -moz-pre-wrap !important;
+  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;
+  /* Opera 4-6 */
+  white-space: -o-pre-wrap;
+  /* Opera 7 */
+  white-space: pre-wrap;
+  /* css-3 */
+  word-wrap: break-word;
+  /* Internet Explorer 5.5+ */
+  white-space: -webkit-pre-wrap;
+  /* Newer versions of Chrome/Safari*/
+  word-break: break-word;
+  white-space: normal;
+}
+
+p.reviewer-title {
+  font-weight: bold;
 }
 
