@@ -12,4 +12,9 @@ class Questionnaire extends Model
         return $this->hasMany('App\Answer', 'questionnaire_id');
     }
 
+    public function questionnaireGroup()
+    {
+        return $this->belongsTo('\App\QuestionnaireGroup', 'questionnaire_group_id', 'id');
+    }
+
 }

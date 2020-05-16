@@ -27,8 +27,8 @@
     <div class="form-group">
         <div class="row">
             <div class="col-md-10">
-                {!! Form::label('name', 'Name:', ['class' => 'control-label']) !!}
-                {!! Form::text('name', $record->name ?? '', ['class' => 'form-control']) !!}
+                {!! Form::label('reviewer_name', 'Name:', ['class' => 'control-label']) !!}
+                {!! Form::text('reviewer_name', $record->name ?? '', ['class' => 'form-control']) !!}
             </div>
             <div class="col-md-2">
                 {!! Form::label('status', 'Status:', ['class' => 'control-label']) !!}

@@ -51,8 +51,8 @@
             <form name="questionnaireGroupDetail">
                 <div class="row">
                     <div class="col-md-12">
-                        {!! Form::label('name', 'Group name:', ['class' => 'control-label']) !!}
-                        {!! Form::text('name', '' , ['class' => 'form-control']) !!}                        
+                        {!! Form::label('group_name', 'Group name:', ['class' => 'control-label']) !!}
+                        {!! Form::text('group_name', '' , ['class' => 'form-control']) !!}                        
                     </div>
                 </div>
                 <div class="row">
@@ -508,7 +508,7 @@
     function openQuestionnaireGroupDetail(id)
     {
         selectedQuestionnaireGroupIndex=id;
-        $('#questionnaireGroupModal input[name=name]').val('');
+        $('#questionnaireGroupModal input[name=group_name]').val('');
         $('#questionnaireGroupModal textarea[name=groupContent]').val('');
         tinymce.get('groupContent').setContent('');
         $('#questionnaireGroupModal select[name=randomly_display_questions]').val('no')
@@ -516,13 +516,13 @@
         selectedQuestionnaireGroup = questionnaireGroups[id];
         
         if(undefined!=selectedQuestionnaireGroup){
-            $('#questionnaireGroupModal input[name=name]').val(selectedQuestionnaireGroup.name);
+            $('#questionnaireGroupModal input[name=group_name]').val(selectedQuestionnaireGroup.name);
             $('#questionnaireGroupModal textarea[name=groupContent]').val(selectedQuestionnaireGroup.content);
             tinymce.get('groupContent').setContent(selectedQuestionnaireGroup.content);
             $('#questionnaireGroupModal select[name=randomly_display_questions]').val(selectedQuestionnaireGroup.randomly_display_questions)
         }
         $('#questionnaireGroupModal').modal('show');
-        $('#questionnaireGroupModal input[name=name]').focus();
+        $('#questionnaireGroupModal input[name=group_name]').focus();
     }   
 
     function saveQuestionnaireGroup() 
@@ -532,7 +532,7 @@
 
         var data = {
             'id': id,
-            'name': $('#questionnaireGroupModal input[name=name]').val(),
+            'name': $('#questionnaireGroupModal input[name=group_name]').val(),
             'content': tinymce.get('groupContent').getContent(),
             'randomly_display_questions':$('#questionnaireGroupModal select[name=randomly_display_questions]').val(),
         };

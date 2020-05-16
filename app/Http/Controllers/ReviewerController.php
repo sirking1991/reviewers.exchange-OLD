@@ -6,9 +6,7 @@ use App\Reviewer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\Node\Expr\Cast\String_;
 
 class ReviewerController extends Controller
 {
@@ -62,7 +60,7 @@ class ReviewerController extends Controller
     public function save(Request $request)
     {
         $request->validate([
-            'name' => ['required'],
+            'reviewer_name' => ['required'],
         ]);
 
         $record = Reviewer::where('user_id', Auth()->user()->id)
@@ -73,7 +71,7 @@ class ReviewerController extends Controller
             $record->user_id = Auth()->user()->id;
         }
 
-        $record->name = $request->name;
+        $record->name = $request->reviewer_name;
         $record->status = $request->status;
         $record->questionnaires_to_display = $request->questionnaires_to_display;
         $record->time_limit = $request->time_limit;
@@ -113,7 +111,9 @@ class ReviewerController extends Controller
             ]);
             if (null != $request->input('answers')) {
                 $answers = json_decode($request->input('answers'));
+                $correctAnswerCount = 0;
                 foreach ($answers  as $index => $answer) {
+                    if ('yes'==$answer->is_correct) $correctAnswerCount++;
                     $ans = \App\Answer::create([
                         'questionnaire_id' => $question->id,
                         'answer' => $answer->answer,
@@ -130,7 +130,10 @@ class ReviewerController extends Controller
                         }
                     }
                 }
+                $question->correct_answer_count = $correctAnswerCount;
+                $question->save();
             }
+
         } else {
             Log::debug('updating question record');
             $question = \App\Questionnaire::where('user_id', Auth()->user()->id)
@@ -149,7 +152,9 @@ class ReviewerController extends Controller
             if (null != $request->input('answers') || 0 == count($request->input('answers'))) {
                 $answers = json_decode($request->input('answers'));
                 $safeAnswerId = [];
+                $correctAnswerCount = 0;
                 foreach ($answers  as $index => $answer) {
+                    if ('yes'==$answer->is_correct) $correctAnswerCount++;
                     if (isset($answer->id)) {
                         \App\Answer::where('id', $answer->id)
                             ->update([
@@ -187,6 +192,8 @@ class ReviewerController extends Controller
                         }
                     }
                 }
+                $question->correct_answer_count = $correctAnswerCount;
+                $question->save();                
                 // delete other answers that where not part of the answer submitted
                 \App\Answer::where('questionnaire_id', $questionId)->whereNotIn('id', $safeAnswerId)->delete();
             } else {
@@ -327,5 +334,29 @@ class ReviewerController extends Controller
             ->update(['questionnaire_group_id' => 0]);
 
         return \App\QuestionnaireGroup::where('reviewer_id', $reviewerId)->get();
+    }
+
+    public function generateExam(String $reviewerId)
+    {
+        $reviewer = \App\Reviewer::find($reviewerId);
+
+        // check if reviewer exist
+        if (!$reviewer) return response('', 404);
+
+        // check if user has purchase he reviewer
+        $reviewerPurchased = \App\ReviewerPurchase::where('user_id', Auth()->user()->id)
+            ->where('reviewer_id',  $reviewer->id)
+            ->get();
+        if(0==count($reviewerPurchased)) return response('User has not purchased the reviewer', 404);
+
+        $questionnaires = \App\Questionnaire::where('reviewer_id', $reviewer->id)
+            ->where('correct_answer_count', '>', 0)
+            ->inRandomOrder()
+            ->limit($reviewer->questionnaires_to_display)
+            ->with('answers')
+            ->with('questionnaireGroup')
+            ->get();
+
+        return response()->json(['reviewer'=>$reviewer, 'questionnaire'=>$questionnaires]);
     }
 }

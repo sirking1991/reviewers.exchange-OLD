@@ -34,5 +34,12 @@ Route::middleware(['checkifadmin'])->group(function () {
     Route::get('/admin/reviewers/{reviewerId}/questionnaire-groups', 'ReviewerController@questionnaireGroups' );
     Route::match(['post', 'put'], '/admin/reviewers/{reviewerId}/questionnaire-group/{id?}', 'ReviewerController@questionnaireGroupSave' );
     Route::match(['delete'], '/admin/reviewers/{reviewerId}/questionnaire-group/{id}', 'ReviewerController@questionnaireGroupDelete' );
+    
+});
+
+Route::middleware(['auth'])->group(function(){
+
+    Route::get('/generateExam/{reviewerId}', 'ReviewerController@generateExam');
+
 });
 
