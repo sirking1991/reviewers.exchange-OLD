@@ -201,7 +201,9 @@ class ReviewersPurchasedComponent extends Component
 
                 $('#practiceExamModal .modal-body .question').html(currentQuestion.question);
 
-                $('#practiceExamModal .modal-body .answers button').remove();
+                if ('yes'==currentQuestion.randomly_display_answers) shuffle(currentQuestion.answers);
+
+                $('#practiceExamModal .modal-body .answers button').remove();                
                 for(var i=0; i<currentQuestion.answers.length; i++) {
                     var answer = currentQuestion.answers[i];
                     var selectedClass = (undefined!=answer.selected) ? selectedAnswerClass : '';  // lets mark the answer selected/unselected                    
@@ -280,6 +282,14 @@ class ReviewersPurchasedComponent extends Component
             {
                 currentQuestionnaireIndex++;
                 displayQuestion();
+            }
+
+            function shuffle(array) 
+            {
+                for (let i = array.length - 1; i > 0; i--) {
+                  let j = Math.floor(Math.random() * (i + 1));
+                  [array[i], array[j]] = [array[j], array[i]];
+                }
             }
         </script>
         
