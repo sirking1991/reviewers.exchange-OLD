@@ -82,17 +82,18 @@ class ReviewersPurchasedComponent extends Component
                     <div class='modal-header hidden'>
                         <span class='title'></span> <div class='time-remaining'></div>
                         <div class="float-right">
-                            <button type="button" class="btn btn-sm btn-danger" onclick='stopExam()'>Stop practice exam</button>
+                            <button type="button" class="btn  btn-danger" onclick='stopExam()'>Stop practice exam</button>
                         </div>                        
                     </div>
                     <div class="modal-body">
                         <h3>Setting up exam questionnaires, pls wait...</h3>
                     </div>      
                     <div class='modal-footer hidden'>
-                        <div class="float-right">                        
+                        <div class="float-right action-buttons">                        
                             <button type="button" class="btn btn-sm btn-secondary prev-question-btn" onclick='prevQuestion()'>Previous question</button>
                             <button type="button" class="btn btn-sm btn-primary next-question-btn" onclick='nextQuestion()'>Next question</button>
                             <button type="button" class="btn btn-sm btn-success submit-answers-btn" onclick='submitAnswers()'>Submit answers</button>
+                            <button type="button" class="btn btn-sm btn-secondary close-btn" data-dismiss="modal" >Close</button>
                         </div>
                     </div>
                 </div>
@@ -103,10 +104,18 @@ class ReviewersPurchasedComponent extends Component
             var reviewers = {!! $reviewersPurchased !!}
             var selectedReviewerPurchased;            
 
-            document.addEventListener("DOMContentLoaded", function() 
-            {
+            const selectedAnswerClass = 'list-group-item-success';
 
-            });
+            var examData;
+            var selectedReviewerId = 0;
+            var currentQuestionnaireIndex = 0;
+            var currentQuestion;
+            var timer;
+            var timeRemaining;
+            
+            var audioCoinUri = '/sounds/347174__davidsraba__coin-pickup-sound-v-0.wav';
+
+            document.addEventListener("DOMContentLoaded", function() {});
 
             function openPurchasedReviewerDialog(index) 
             {
@@ -145,22 +154,44 @@ class ReviewersPurchasedComponent extends Component
                 });
             }
 
-            const selectedAnswerClass = 'list-group-item-success';
-
-            var examData;
-            var selectedReviewerId = 0;
-            var currentQuestionnaireIndex = 0;
-            var currentQuestion;
-            var timer;
-            var timeRemaining;
             
             var examHtml = `
                 <div class='row'>
                     <div class='col-md-12 questionnaire-group'>Questionnaire group</div>
                     <div class='col-md-12 question'>Question</div>
                     <div class='col-md-12' style='margin-top:10px;'>
-                        <div class='no_correct_answers text-muted'></div>
+                        <div class='nmbr_correct_answers text-muted'></div>
                         <div class="list-group answers"></div>
+                    </div>
+                </div>
+            `;
+
+            var examSummaryHtml = `
+                <div class='row p-3'>
+                    <div class='score' style='font-size:xx-large'></div>
+                </div>
+                <div class='row p-3 text-muted'>
+                    Here are the questions that you didn't answer correctly
+                </div>
+                <div class='row p-3 wrong_answers'>
+                    <div class='col-md-12>                        
+                        <div class="accordion" id="accordionAnswers">
+                            <div class="card">
+                                <div class="card-header" id="headingOne">
+                                    <h2 class="mb-0">
+                                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        Collapsible Group Item #1
+                                        </button>
+                                    </h2>
+                                </div>
+
+                                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionAnswers">
+                                    <div class="card-body">
+                                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                                    </div>
+                                </div>
+                            </div>                                                                                                                
+                        </div>
                     </div>
                 </div>
             `;
@@ -169,7 +200,7 @@ class ReviewersPurchasedComponent extends Component
             {
                 $('#practiceExamModal').modal({backdrop: 'static', keyboard: false}); // prevent modal from closing when click outside
                 // get exam
-                axios.get('http://localhost:8000/generateExam/' + selectedReviewerId)
+                axios.get('/generateExam/' + selectedReviewerId)
                     .then(function(resp){
                         examData = resp.data;
                         $('#practiceExamModal .modal-header').removeClass('hidden');
@@ -181,6 +212,8 @@ class ReviewersPurchasedComponent extends Component
                         timeRemaining = parseInt(examData.reviewer.time_limit) * 60 + 1;
                         timer = setInterval(function(){timerTick()}, 1000);
                         $('#practiceExamModal .modal-header .time-remaining').removeClass('pulsate');
+                        
+                        $('#practiceExamModal .modal-footer .close-btn').hide();
 
                         displayQuestion();
                     })
@@ -197,9 +230,75 @@ class ReviewersPurchasedComponent extends Component
             }
 
             function submitAnswers()
-            {
-                // TODO: process answers                
-                console.log(`process answers`);
+            {   
+                clearInterval(timer);
+                $(`#practiceExamModal .modal-header`).hide();
+                $(`#practiceExamModal .modal-body`).html(examSummaryHtml);
+                
+                $('#practiceExamModal .modal-footer .prev-question-btn').hide();
+                $('#practiceExamModal .modal-footer .next-question-btn').hide();
+                $('#practiceExamModal .modal-footer .submit-answers-btn').hide();
+                $('#practiceExamModal .modal-footer .close-btn').show();
+
+                $(`#practiceExamModal .modal-body .wrong_answers .accordion`).html(``);
+                
+                // process answers                
+                var correctAnswers = 0;
+                var wrongAnswers = 0;
+                var wrongAnsweredQuestions = [];
+                for(var q=0; q<examData.questionnaire.length; q++){
+                    var question = examData.questionnaire[q];
+                    // assume correct, unless any of the answer did not match
+                    var isCorrect = true;
+                    for(var ai=0; ai<question.answers.length; ai++){
+                        if('yes'==question.answers[ai].is_correct && undefined==question.answers[ai].selected){
+                            isCorrect = false;
+                            break;
+                        }
+                        if('no'==question.answers[ai].is_correct && 'yes'==question.answers[ai].selected){
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                    question.correctly_answered = isCorrect ? 'yes' : 'no';
+                    if(isCorrect) {
+                        correctAnswers++;
+                    } else {
+                        wrongAnswers++;
+                        wrongAnsweredQuestions.push(question);
+                        $(`#practiceExamModal .modal-body .wrong_answers .accordion`).append(`
+                            <div class="card">
+                                <div class="card-header" id="heading_${question.id}">
+                                    <h2 class="mb-0">
+                                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_${question.id}" aria-expanded="true" aria-controls="collapse_${question.id}">
+                                        Question #${q+1}
+                                        </button>
+                                    </h2>
+                                </div>
+
+                                <div id="collapse_${question.id}" class="collapse show" aria-labelledby="heading_${question.id}" data-parent="#accordionAnswers">
+                                    <div class="card-body">
+                                        ${question.question}
+                                    </div>
+                                </div>
+                            </div>                        
+                        `);
+                    }
+                }
+                
+                axios.post('/saveExamResult', examData)
+                    .then(function(resp){
+                        
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                    });
+
+                
+                $(`#practiceExamModal .modal-body .score`).html(`You got <span id='totalScore'></span> correct answer${correctAnswers>1?'s':''} out of ${examData.questionnaire.length} questions`);
+
+                animateValue("totalScore", 0, correctAnswers, 3000);
             }
 
             function timerTick(){
@@ -209,8 +308,8 @@ class ReviewersPurchasedComponent extends Component
                     $('#practiceExamModal .modal-header .time-remaining').addClass('pulsate');
                 }
 
-                if (0>=timeRemaining) {  
-                    clearInterval(timer);                  
+                if (0>=timeRemaining) {                      
+                    clearInterval(timer);
                     bootbox.alert({
                         centerVertical: true,
                         backdrop: true,
@@ -229,6 +328,7 @@ class ReviewersPurchasedComponent extends Component
                 currentQuestion = examData.questionnaire[currentQuestionnaireIndex];
 
                 $('#practiceExamModal .modal-body').html(examHtml);
+                $(`#practiceExamModal .modal-header`).show();
 
                 if (null != currentQuestion.questionnaire_group) {
                     $('#practiceExamModal .modal-body .questionnaire-group').show();
@@ -254,7 +354,7 @@ class ReviewersPurchasedComponent extends Component
                     `)                    
                 }
 
-                $('#practiceExamModal .modal-body .no_correct_answers').html(`<i>Choose only <strong>${currentQuestion.correct_answer_count}</strong> correct answer</i>`);
+                $('#practiceExamModal .modal-body .nmbr_correct_answers').html(`<i>Choose only <strong>${currentQuestion.correct_answer_count}</strong> correct answer</i>`);
                 
                 setButtons();
             }
@@ -343,6 +443,25 @@ class ReviewersPurchasedComponent extends Component
                 var mDisplay = m > 0 ? m + (m == 1 ? " minute " : " minutes ") : "";
                 var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
                 return hDisplay + mDisplay + sDisplay; 
+            }           
+            
+            function animateValue(id, start, end, duration) {
+                var range = end - start;
+                var current = start;
+                var increment = end > start? 1 : -1;
+                var stepTime = Math.abs(Math.floor(duration / range));
+                var obj = document.getElementById(id);
+                var sounds = [];
+                var timer = setInterval(function() {                    
+                    current += increment;
+                    sounds[current] = new Audio(audioCoinUri);
+                    sounds[current].play();
+                    obj.innerHTML = current;
+                    if (current == end) {                        
+                        clearInterval(timer);
+                    }
+                }, stepTime);
+
             }            
         </script>
         
