@@ -40,6 +40,7 @@ Route::middleware(['checkifadmin'])->group(function () {
 Route::middleware(['auth'])->group(function(){
 
     Route::get('/generateExam/{reviewerId}', 'ReviewerController@generateExam');
+    Route::post('/saveExamResult', 'ReviewerController@saveExamResult');
 
 });
 

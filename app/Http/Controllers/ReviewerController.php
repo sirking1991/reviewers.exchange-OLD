@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Reviewer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Storage;
@@ -358,5 +359,35 @@ class ReviewerController extends Controller
             ->get();
 
         return response()->json(['reviewer'=>$reviewer, 'questionnaire'=>$questionnaires]);
+    }
+
+    public function saveExamResult(Request $request)
+    {
+        // dd($request->reviewer);
+        $examResult = \App\ExamResult::create([
+            'reviewer_id' => $request->reviewer['id'],
+            'user_id' => Auth()->user()->id,
+            'taken_on' => date('Y-m-d H:i:s'),
+            'questions' => count($request->questionnaire),
+        ]);
+
+        $correct = 0;
+        $wrong = 0;
+        foreach ($request->questionnaire as $question) {
+            if ('yes'==$question['correctly_answered']) $correct++;
+            if ('no'==$question['correctly_answered']) $wrong++;
+            \App\ExamResultQuestionAnswer::create([
+                'exam_result_id' => $examResult->id,
+                'questionnaire_id' => $question['id'],
+                'is_correct_answer' => $question['correctly_answered'],
+                'raw_data' => json_encode($question)
+            ]);
+        }
+
+        $examResult->correct_answers = $correct;
+        $examResult->wrong_answers = $wrong;
+        $examResult->save();
+
+        return response()->json();
     }
 }
