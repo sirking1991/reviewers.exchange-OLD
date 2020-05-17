@@ -80,9 +80,9 @@ class ReviewersPurchasedComponent extends Component
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class='modal-header hidden'>
-                        <span class='title'></span>
+                        <span class='title'></span> <div class='time-remaining'></div>
                         <div class="float-right">
-                            <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal">Stop practice exam</button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick='stopExam()'>Stop practice exam</button>
                         </div>                        
                     </div>
                     <div class="modal-body">
@@ -151,6 +151,8 @@ class ReviewersPurchasedComponent extends Component
             var selectedReviewerId = 0;
             var currentQuestionnaireIndex = 0;
             var currentQuestion;
+            var timer;
+            var timeRemaining;
             
             var examHtml = `
                 <div class='row'>
@@ -176,12 +178,50 @@ class ReviewersPurchasedComponent extends Component
                         currentQuestionnaireIndex = 0;
                         currentQuestion = undefined;
 
+                        timeRemaining = parseInt(examData.reviewer.time_limit) * 60 + 1;
+                        timer = setInterval(function(){timerTick()}, 1000);
+                        $('#practiceExamModal .modal-header .time-remaining').removeClass('pulsate');
+
                         displayQuestion();
                     })
                     .catch(function (error) {
                         // handle error
                         console.log(error);
                     });              
+            }
+
+            function stopExam() 
+            {
+                clearInterval(timer);
+                $('#practiceExamModal').modal('hide');
+            }
+
+            function submitAnswers()
+            {
+                // TODO: process answers                
+                console.log(`process answers`);
+            }
+
+            function timerTick(){
+                timeRemaining--;
+
+                if (120>=timeRemaining && !$('#practiceExamModal .modal-header .time-remaining').hasClass('pulsate')) {
+                    $('#practiceExamModal .modal-header .time-remaining').addClass('pulsate');
+                }
+
+                if (0>=timeRemaining) {  
+                    clearInterval(timer);                  
+                    bootbox.alert({
+                        centerVertical: true,
+                        backdrop: true,
+                        message: `Time is up!`,
+                        callback: function () {
+                            submitAnswers();
+                        }
+                    });                    
+                }
+
+                $('#practiceExamModal .modal-header .time-remaining').html( secondsToHms(timeRemaining) );
             }
             
             function displayQuestion()
@@ -291,6 +331,19 @@ class ReviewersPurchasedComponent extends Component
                   [array[i], array[j]] = [array[j], array[i]];
                 }
             }
+
+            function secondsToHms(d) 
+            {
+                d = Number(d);
+                var h = Math.floor(d / 3600);
+                var m = Math.floor(d % 3600 / 60);
+                var s = Math.floor(d % 3600 % 60);
+            
+                var hDisplay = h > 0 ? h + (h == 1 ? " hour " : " hours ") : "";
+                var mDisplay = m > 0 ? m + (m == 1 ? " minute " : " minutes ") : "";
+                var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+                return hDisplay + mDisplay + sDisplay; 
+            }            
         </script>
         
         blade;
