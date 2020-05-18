@@ -61,10 +61,10 @@ class ReviewersPurchasedComponent extends Component
                                 <p class='reviewer-title'></p>
                                 <p class='reviewer-content'></p>
                                 <p class='stats'>
-                                    Questions answered: <span class='questions-answered'>121</span><br/>
-                                    Correcly answered: <span class='correctly-answered'>89</span><br/>
-                                    Incorrecly answered: <span class='incorrectly-answered'>32</span> <button class='btn btn-sm btn-secondary'>View</button><br/>
-                                    Average: <span class='average'>74%</span><br/>
+                                    Questions answered: <span class='questions-answered'></span><br/>
+                                    Correcly answered: <span class='correct_answers'></span><br/>
+                                    Incorrecly answered: <span class='wrong_answers'></span><br/>
+                                    Average: <span class='average'></span>%<br/>
                                 </p>
                             </div>                            
                         </div>
@@ -121,6 +121,21 @@ class ReviewersPurchasedComponent extends Component
             {
                 var rp = this.reviewers[index];
                 selectedReviewerId = rp.reviewer_id;
+
+                axios.get('/userExamSummary/' + selectedReviewerId)
+                    .then(function(resp){
+                        console.log(resp.data);
+                        const average = Math.round((resp.data.correct_answers / resp.data.questions) * 100);
+                        // questions-answered
+                        animateValue("#reviewerPurchasedModal .stats .questions-answered", 0, resp.data.questions, 2000, false);
+                        // correct_answers
+                        animateValue("#reviewerPurchasedModal .stats .correct_answers", 0, resp.data.correct_answers, 2000, false);
+                        // wrong_answers
+                        animateValue("#reviewerPurchasedModal .stats .wrong_answers", 0, resp.data.wrong_answers, 2000, false);
+                        // average                        
+                        animateValue("#reviewerPurchasedModal .stats .average", 0, average, 2000, false);
+                    })
+                    .catch(function(error){console.log(error)});
 
                 selectedReviewerPurchased = this.reviewers[index];
                 $('#reviewerPurchasedModal p.reviewer-title').html(selectedReviewerPurchased.reviewer.name);
@@ -288,7 +303,7 @@ class ReviewersPurchasedComponent extends Component
                 
                 axios.post('/saveExamResult', examData)
                     .then(function(resp){
-                        
+                        // 
                     })
                     .catch(function (error) {
                         // handle error
@@ -298,7 +313,7 @@ class ReviewersPurchasedComponent extends Component
                 
                 $(`#practiceExamModal .modal-body .score`).html(`You got <span id='totalScore'></span> correct answer${correctAnswers>1?'s':''} out of ${examData.questionnaire.length} questions`);
 
-                animateValue("totalScore", 0, correctAnswers, 3000);
+                animateValue("#totalScore", 0, correctAnswers, 3000);
             }
 
             function timerTick(){
@@ -445,18 +460,19 @@ class ReviewersPurchasedComponent extends Component
                 return hDisplay + mDisplay + sDisplay; 
             }           
             
-            function animateValue(id, start, end, duration) {
+            function animateValue(el, start, end, duration, playSound=true) {
                 var range = end - start;
                 var current = start;
                 var increment = end > start? 1 : -1;
                 var stepTime = Math.abs(Math.floor(duration / range));
-                var obj = document.getElementById(id);
                 var sounds = [];
                 var timer = setInterval(function() {                    
                     current += increment;
-                    sounds[current] = new Audio(audioCoinUri);
-                    sounds[current].play();
-                    obj.innerHTML = current;
+                    if (playSound){
+                        sounds[current] = new Audio(audioCoinUri);
+                        sounds[current].play();
+                    }
+                    $(el).html(current);
                     if (current == end) {                        
                         clearInterval(timer);
                     }

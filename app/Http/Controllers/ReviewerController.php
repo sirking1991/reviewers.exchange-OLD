@@ -390,4 +390,13 @@ class ReviewerController extends Controller
 
         return response()->json();
     }
+
+    public function userExamSummary(Request $request, $reviewerId)
+    {
+        return response()->json([
+            'questions'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('questions'),
+            'correct_answers'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('correct_answers'),
+            'wrong_answers'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('wrong_answers'),
+            ]);
+    }
 }

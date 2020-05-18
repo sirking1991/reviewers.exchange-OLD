@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function(){
 
     Route::get('/generateExam/{reviewerId}', 'ReviewerController@generateExam');
     Route::post('/saveExamResult', 'ReviewerController@saveExamResult');
+    Route::get('/userExamSummary/{reviewerId}', 'ReviewerController@userExamSummary');
 
 });
 
