@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->describe('Display an inspiring quote');
+use Aceraven777\PayMaya\PayMayaSDK;
+Artisan::command('set-paymaya-webhooks', function () {
+
+    $url = $this->ask('Base URL');
+
+    $paymayaController = new \App\Http\Controllers\PaymayaController();
+
+    $paymayaController->setupWebhooks($url);
+});

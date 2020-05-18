@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Aceraven777\PayMaya\PayMayaSDK;
 use App\Reviewer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -398,5 +399,11 @@ class ReviewerController extends Controller
             'correct_answers'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('correct_answers'),
             'wrong_answers'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('wrong_answers'),
             ]);
+    }
+
+    public function buyReviewer($reviewerId)
+    {
+        // TODO: check if user has no yet purchase this reviewer
+        return redirect('paymaya/checkout');
     }
 }

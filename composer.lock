@@ -4,8 +4,57 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b464cf7e834d052631f592dbdaa87194",
+    "content-hash": "c6d7cfd6ce11857e2c413ee955925b65",
     "packages": [
+        {
+            "name": "aceraven777/laravel-paymaya",
+            "version": "v1.0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aceraven777/laravel-paymaya.git",
+                "reference": "2eba574c685c20722a3d7ddbb3dc4bc37055b094"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aceraven777/laravel-paymaya/zipball/2eba574c685c20722a3d7ddbb3dc4bc37055b094",
+                "reference": "2eba574c685c20722a3d7ddbb3dc4bc37055b094",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "illuminate/support": "^5.0|^6.0|^7.0",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.8.*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Aceraven777\\PayMaya\\PayMayaServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Aceraven777\\PayMaya\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aristheo Lacdao",
+                    "email": "aceraven777@gmail.com"
+                }
+            ],
+            "description": "PayMaya Payment integration to Laravel",
+            "time": "2020-05-15T08:35:41+00:00"
+        },
         {
             "name": "asm89/stack-cors",
             "version": "1.3.0",
