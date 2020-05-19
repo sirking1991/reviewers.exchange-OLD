@@ -15,6 +15,7 @@ class ReviewersPurchasedComponent extends Component
     public function __construct()
     {
         $this->reviewersPurchased = \App\ReviewerPurchase::where('user_id', Auth()->user()->id)
+            ->where('status', 'success')
             ->with('reviewer')
             ->get();
     }

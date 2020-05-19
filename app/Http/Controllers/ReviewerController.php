@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Aceraven777\PayMaya\PayMayaSDK;
 use App\Reviewer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
 use Illuminate\Support\Facades\Storage;
+
+use Aceraven777\PayMaya\Model\Checkout\Item;
+use Aceraven777\PayMaya\Model\Checkout\ItemAmount;
+use Aceraven777\PayMaya\Model\Checkout\ItemAmountDetails;
+use App\Libraries\PayMaya\User as PayMayaUser;
 
 class ReviewerController extends Controller
 {
@@ -404,6 +406,57 @@ class ReviewerController extends Controller
     public function buyReviewer($reviewerId)
     {
         // TODO: check if user has no yet purchase this reviewer
-        return redirect('paymaya/checkout');
+        $reviewer = \App\Reviewer::find($reviewerId);
+        if(!$reviewer) return redirect('home');
+
+        // create the item and customer object
+        $itemName = $reviewer->name;
+        $totalPrice = $reviewer->price + 
+                        (env('PAYMAYA_ADDON_AMOUNT') 
+                        + (env('PAYMAYA_ADDON_RATE') * $reviewer->price) 
+                        + (env('CONVINIENCE_FEE_RATE') * $reviewer->price));
+    
+        $userPhone = '';
+        $userEmail = Auth()->user()->email;
+        
+        $reference = Auth()->user()->id . '-' . date('YmdHis');
+    
+        // Item
+        $itemAmountDetails = new ItemAmountDetails();
+        $itemAmountDetails->tax = "0.00";
+        $itemAmountDetails->subtotal = number_format($totalPrice, 2, '.', '');
+        $itemAmount = new ItemAmount();
+        $itemAmount->currency = "PHP";
+        $itemAmount->value = $itemAmountDetails->subtotal;
+        $itemAmount->details = $itemAmountDetails;
+        $item = new Item();
+        $item->name = $itemName;
+        $item->amount = $itemAmount;
+        $item->totalAmount = $itemAmount;    
+        
+        $user = new PayMayaUser();
+        $user->contact->phone = $userPhone;
+        $user->contact->email = $userEmail;
+
+        $paymaya = new \App\Http\Controllers\PaymayaController();
+
+        $checkout = $paymaya->checkout($user, $item, $itemAmount, $reference);
+        $gatewayPaymentObject = $checkout->retrieve();
+        
+        // cancell all 'pending' order
+        \App\ReviewerPurchase::where('user_id', Auth()->user()->id)->where('status', 'pending')->update(['status'=>'cancelled']);
+
+        // create new order
+        \App\ReviewerPurchase::create([
+            'reference' => $reference,
+            'gateway_trans_id' => $gatewayPaymentObject['id'],
+            'reviewer_id' => $reviewerId,
+            'user_id' => Auth()->user()->id,
+            'amount' => $reviewer->price,
+            'raw_request_data' => json_encode($gatewayPaymentObject),
+            'raw_response_data' => '',
+        ]);
+
+        return redirect()->to($checkout->url);
     }
 }

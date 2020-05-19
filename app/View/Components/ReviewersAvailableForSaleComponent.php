@@ -3,6 +3,7 @@
 namespace App\View\Components;
 
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\DB;
 
 class ReviewersAvailableForSaleComponent extends Component
 {
@@ -14,7 +15,14 @@ class ReviewersAvailableForSaleComponent extends Component
      */
     public function __construct()
     {
-        $this->reviewers = \App\Reviewer::all();
+        // $this->reviewers = \App\Reviewer::all();
+        $this->reviewers = DB::select("
+                        SELECT * FROM reviewers 
+                        WHERE status='active'
+                            AND id NOT IN (SELECT reviewer_id 
+                                            FROM reviewer_purchases 
+                                            WHERE user_id=" . Auth()->user()->id . " AND status='success')");
+                
     }
 
     /**
@@ -32,13 +40,15 @@ class ReviewersAvailableForSaleComponent extends Component
                     <div class="card-header"><h4>Reviewers available for sale</h4></div>
                     <div class="card-body horizontal-scroll">
                         @foreach($reviewers as $index => $r)
+                        @php
+                            $sellingPrice = $r->price +  ( env('PAYMAYA_ADDON_AMOUNT')  + (env('PAYMAYA_ADDON_RATE') * $r->price)  + (env('CONVINIENCE_FEE_RATE') * $r->price) );
+                        @endphp
                         <div class="card">
                             <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
                             <div class="card-body wrapword">
                                 <p class='name'>{{ $r->name }}</p>
-                                <p class='selling-price'>
-                                    {{ $r->price }}
-                                    <button class='btn btn-danger' onclick="buyNow({{ $index }})">Buy Now</button>                                
+                                <p class='selling-price'>                                    
+                                    <button class='btn btn-danger btn-block' onclick="buyNow({{ $r->id }})">Buy Now {{ number_format($sellingPrice, 2) }}</button>                                
                                 </p> 
                             </div>
                         </div>
@@ -72,17 +82,10 @@ class ReviewersAvailableForSaleComponent extends Component
 
 
         <script>
-            var reviewers = {!! $reviewers !!}
-
-            function openReviewerDetail(index)
+            
+            function buyNow(reviewerId)
             {
-
-            }
-
-            function buyNow(index)
-            {
-                const reviewer = reviewers[index]
-                window.location = '/buyReviewer/' + reviewer.id;
+                window.location = '/buyReviewer/' + reviewerId;
             }
         </script>
 

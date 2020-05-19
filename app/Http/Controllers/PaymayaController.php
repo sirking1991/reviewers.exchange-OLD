@@ -9,10 +9,6 @@ use Aceraven777\PayMaya\PayMayaSDK;
 use Aceraven777\PayMaya\API\Webhook;
 use Aceraven777\PayMaya\API\Customization;
 use Aceraven777\PayMaya\API\Checkout;
-use Aceraven777\PayMaya\Model\Checkout\Item;
-use App\Libraries\PayMaya\User as PayMayaUser;
-use Aceraven777\PayMaya\Model\Checkout\ItemAmount;
-use Aceraven777\PayMaya\Model\Checkout\ItemAmountDetails;
 use Aceraven777\PayMaya\API\VoidPayment;
 use Aceraven777\PayMaya\API\RefundPayment;
 use Aceraven777\PayMaya\Model\Refund\Amount;
@@ -66,7 +62,8 @@ class PaymayaController extends Controller
     
     public function callback(Request $request, $status)
     {
-    
+        Log::info('paymaya callback', ['status'=>$status, 'request'=>$request->all()]);
+
         $transaction_id = $request->get('id');
         if (! $transaction_id) {
             return ['status' => false, 'message' => 'Transaction Id Missing'];
@@ -81,6 +78,17 @@ class PaymayaController extends Controller
             $error = $itemCheckout::getError();
             return redirect()->back()->withErrors(['message' => $error['message']]);
         }
+
+        // find the gatewate_trans_id and update
+        $reviewerPurchase = \App\ReviewerPurchase::where('gateway_trans_id', $itemCheckout->id)->first();
+        if(!$reviewerPurchase) {
+            Log::error('paymaya callback: unrecognized gateway transaction id', ['id', $itemCheckout->id, 'raw_data'=>json_encode($checkout)]);
+            return response()->json('Unrecognized gateway transaction id', 404);
+        }
+
+        $reviewerPurchase->status = $status;
+        $reviewerPurchase->raw_response_data = json_encode($checkout);
+        $reviewerPurchase->save();
     
         return $checkout;
     }      
@@ -100,45 +108,18 @@ class PaymayaController extends Controller
         $shopCustomization->set();
     }
     
-    public function checkout()
+    public function checkout($user, $item, $itemAmount, $reference)
     {
-
-        $sample_item_name = 'Product 1';
-        $sample_total_price = 1000.00;
-    
-        $sample_user_phone = '1234567';
-        $sample_user_email = 'test@gmail.com';
-        
-        $sample_reference_number = 'order-' . date('YmdHis');
-    
-        // Item
-        $itemAmountDetails = new ItemAmountDetails();
-        $itemAmountDetails->tax = "0.00";
-        $itemAmountDetails->subtotal = number_format($sample_total_price, 2, '.', '');
-        $itemAmount = new ItemAmount();
-        $itemAmount->currency = "PHP";
-        $itemAmount->value = $itemAmountDetails->subtotal;
-        $itemAmount->details = $itemAmountDetails;
-        $item = new Item();
-        $item->name = $sample_item_name;
-        $item->amount = $itemAmount;
-        $item->totalAmount = $itemAmount;
-    
         // Checkout
         $itemCheckout = new Checkout();
-    
-        $user = new PayMayaUser();
-        $user->contact->phone = $sample_user_phone;
-        $user->contact->email = $sample_user_email;
-    
         $itemCheckout->buyer = $user->buyerInfo();
         $itemCheckout->items = array($item);
         $itemCheckout->totalAmount = $itemAmount;
-        $itemCheckout->requestReferenceNumber = $sample_reference_number;
+        $itemCheckout->requestReferenceNumber = $reference;
         $itemCheckout->redirectUrl = array(
-            "success" => url('paymaya/redirectUrl/success'),
-            "failure" => url('paymaya/redirectUrl/failure'),
-            "cancel" => url('paymaya/redirectUrl/cancel'),
+            "success" => url('paymaya/redirectUrl/success/' . $reference),
+            "failure" => url('paymaya/redirectUrl/failure/' . $reference),
+            "cancel" => url('paymaya/redirectUrl/cancel/' . $reference),
         );
         
         if ($itemCheckout->execute() === false) {            
@@ -153,10 +134,10 @@ class PaymayaController extends Controller
             return redirect()->back()->withErrors(['message' => $error['message']??'Unknown error']);
         }
     
-        return redirect()->to($itemCheckout->url);
+        return $itemCheckout;
     }  
 
-    public function redirect(Request $request, $status)
+    public function redirect(Request $request, $status, $reference)
     {
         Log::info('paymaya redirect', ['status'=>$status, 'request'=>$request->all()]);
 

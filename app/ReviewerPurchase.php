@@ -8,6 +8,8 @@ class ReviewerPurchase extends Model
 {
     protected $table = 'reviewer_purchases';
 
+    protected $guarded = [];
+
     public function user()
     {
         return $this->belongsTo('App\User');
