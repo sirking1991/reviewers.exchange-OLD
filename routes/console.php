@@ -15,11 +15,22 @@ use Illuminate\Support\Facades\Artisan;
 */
 
 use Aceraven777\PayMaya\PayMayaSDK;
-Artisan::command('set-paymaya-webhooks', function () {
+Artisan::command('paymaya:webhooks-set', function () {
 
     $url = $this->ask('Base URL');
 
     $paymayaController = new \App\Http\Controllers\PaymayaController();
 
+    $paymayaController->clearWebhooks();
     $paymayaController->setupWebhooks($url);
+});
+
+Artisan::command('paymaya:webhooks-list', function(){
+    $paymayaController = new \App\Http\Controllers\PaymayaController();
+
+    $list = $paymayaController->listWebhooks();
+
+    foreach ($list as $wh) {
+        dump($wh);
+    }
 });

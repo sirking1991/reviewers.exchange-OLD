@@ -31,8 +31,6 @@ class PaymayaController extends Controller
 
     public function setupWebhooks($url)
     {
-        $this->clearWebhooks();
-    
         $successWebhook = new Webhook();
         $successWebhook->name = Webhook::CHECKOUT_SUCCESS;
         $successWebhook->callbackUrl = $url . '/paymaya/callback/success';
@@ -52,13 +50,18 @@ class PaymayaController extends Controller
         Log::info('payamay dropout webhook setup', ['result'=>$result]);
     }
     
-    private function clearWebhooks()
+    public function clearWebhooks()
     {
         $webhooks = Webhook::retrieve();
         foreach ($webhooks as $webhook) {
             $webhook->delete();
         }
     }  
+
+    public function listWebhooks()
+    {
+        return Webhook::retrieve();
+    }
     
     public function callback(Request $request, $status)
     {

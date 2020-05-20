@@ -73,8 +73,11 @@ class ReviewerController extends Controller
         if (!$record) {
             $record = new Reviewer();
             $record->user_id = Auth()->user()->id;
+            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1,10) . ".jpg";
         }
 
+        if(''==$record->cover_photo)
+            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1,10) . ".jpg";
         $record->name = $request->reviewer_name;
         $record->status = $request->status;
         $record->questionnaires_to_display = $request->questionnaires_to_display;

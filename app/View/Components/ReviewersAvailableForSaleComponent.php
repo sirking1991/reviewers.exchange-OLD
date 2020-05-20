@@ -44,7 +44,7 @@ class ReviewersAvailableForSaleComponent extends Component
                             $sellingPrice = $r->price +  ( env('PAYMAYA_ADDON_AMOUNT')  + (env('PAYMAYA_ADDON_RATE') * $r->price)  + (env('CONVINIENCE_FEE_RATE') * $r->price) );
                         @endphp
                         <div class="card">
-                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+                            <img src="{{ $r->cover_photo }}" class="card-img-top" alt="...">
                             <div class="card-body wrapword">
                                 <p class='name'>{{ $r->name }}</p>
                                 <p class='selling-price'>                                    
@@ -64,7 +64,7 @@ class ReviewersAvailableForSaleComponent extends Component
                     <div class="modal-body">
                         <div class="row">
                             <div class='col-md-5'>
-                                <img src="https://via.placeholder.com/300">
+                                <img class='cover-photo' src="https://via.placeholder.com/300">
                             </div>                             
                             <div clas='col-md'>
                                 <p class='reviewer-title'></p>

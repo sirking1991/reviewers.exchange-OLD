@@ -36,7 +36,7 @@ class ReviewersPurchasedComponent extends Component
                         <div class="card-body horizontal-scroll">
                             @foreach($reviewersPurchased as $index => $rp)
                             <div class="card" onclick="openPurchasedReviewerDialog({{ $index }})">
-                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+                                <img src="{{ $rp->reviewer->cover_photo }}" class="card-img-top" alt="...">
                                 <div class="card-body wrapword">{{ $rp->reviewer->name }}</div>
                             </div>
                             @endforeach
@@ -54,11 +54,9 @@ class ReviewersPurchasedComponent extends Component
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
-                        <div class="row">
-                            <div class='col-md-5'>
-                                <img src="https://via.placeholder.com/300">
-                            </div>                             
-                            <div clas='col-md'>
+                        <div class="card">
+                            <img class='cover-photo' src="https://via.placeholder.com/300">
+                            <div class="card-body">
                                 <p class='reviewer-title'></p>
                                 <p class='reviewer-content'></p>
                                 <p class='stats'>
@@ -67,12 +65,10 @@ class ReviewersPurchasedComponent extends Component
                                     Incorrecly answered: <span class='wrong_answers'></span><br/>
                                     Average: <span class='average'></span>%<br/>
                                 </p>
-                            </div>                            
+                                <input type='button' onclick='confirmStartExam()' class="btn btn-success btn-lg btn-block" value='Take Practice Exam' /> 
+                            </div> 
                         </div>
-                    </div>      
-                    <div class='modal-footer'>
-                        <input type='button' onclick='confirmStartExam()' class="btn btn-success btn-lg btn-block" value='Take Practice Exam' /> 
-                    </div>
+                    </div>  
                 </div>
             </div>
         </div>
@@ -123,23 +119,40 @@ class ReviewersPurchasedComponent extends Component
                 var rp = this.reviewers[index];
                 selectedReviewerId = rp.reviewer_id;
 
-                axios.get('/userExamSummary/' + selectedReviewerId)
-                    .then(function(resp){
-                        console.log(resp.data);
-                        const average = Math.round((resp.data.correct_answers / resp.data.questions) * 100);
+                $.get('/userExamSummary/' + selectedReviewerId)
+                    .then(function(data){
+                        console.log(data);
+                        const average = Math.round((data.correct_answers / data.questions) * 100);
+                        
                         // questions-answered
-                        animateValue("#reviewerPurchasedModal .stats .questions-answered", 0, resp.data.questions, 2000, false);
+                        if(0==data.questions)
+                            $("#reviewerPurchasedModal .stats .questions-answered").html('0');
+                        else
+                            animateValue("#reviewerPurchasedModal .stats .questions-answered", 0, data.questions, 2000, false);
+                        
                         // correct_answers
-                        animateValue("#reviewerPurchasedModal .stats .correct_answers", 0, resp.data.correct_answers, 2000, false);
+                        if(0==data.correct_answers)
+                            $("#reviewerPurchasedModal .stats .correct_answers").html('0');
+                        else
+                            animateValue("#reviewerPurchasedModal .stats .correct_answers", 0, data.correct_answers, 2000, false);
+                        
                         // wrong_answers
-                        animateValue("#reviewerPurchasedModal .stats .wrong_answers", 0, resp.data.wrong_answers, 2000, false);
-                        // average                        
-                        animateValue("#reviewerPurchasedModal .stats .average", 0, average, 2000, false);
+                        if(0==data.wrong_answers)
+                            $("#reviewerPurchasedModal .stats .wrong_answers").html('0');
+                        else
+                            animateValue("#reviewerPurchasedModal .stats .wrong_answers", 0, data.wrong_answers, 2000, false);
+                        
+                        // average
+                        if(isNaN(average) || undefined==average || 0==average)   
+                            $("#reviewerPurchasedModal .stats .average").html('0');                     
+                        else
+                            animateValue("#reviewerPurchasedModal .stats .average", 0, average, 2000, false);
                     })
-                    .catch(function(error){console.log(error)});
+                    .catch(function(e){console.log(e)});
 
                 selectedReviewerPurchased = this.reviewers[index];
                 $('#reviewerPurchasedModal p.reviewer-title').html(selectedReviewerPurchased.reviewer.name);
+                $('#reviewerPurchasedModal img.cover-photo').attr('src', selectedReviewerPurchased.reviewer.cover_photo);
                 $('#reviewerPurchasedModal').modal('show');
             }
 
@@ -216,9 +229,9 @@ class ReviewersPurchasedComponent extends Component
             {
                 $('#practiceExamModal').modal({backdrop: 'static', keyboard: false}); // prevent modal from closing when click outside
                 // get exam
-                axios.get('/generateExam/' + selectedReviewerId)
-                    .then(function(resp){
-                        examData = resp.data;
+                $.get('/generateExam/' + selectedReviewerId)
+                    .then(function(data){
+                        examData = data;
                         $('#practiceExamModal .modal-header').removeClass('hidden');
                         $('#practiceExamModal .modal-footer').removeClass('hidden');                        
                         
@@ -362,10 +375,13 @@ class ReviewersPurchasedComponent extends Component
                 $('#practiceExamModal .modal-body .answers button').remove();                
                 for(var i=0; i<currentQuestion.answers.length; i++) {
                     var answer = currentQuestion.answers[i];
-                    var selectedClass = (undefined!=answer.selected) ? selectedAnswerClass : '';  // lets mark the answer selected/unselected                    
+                    var selectedClass = (undefined!=answer.selected) ? selectedAnswerClass : '';  // lets mark the answer selected/unselected  
+                    var content = '' != answer.image 
+                                        ? "<img src='https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/" + answer.image + "' />"
+                                        : answer.answer;
                     $('#practiceExamModal .modal-body .answers').append(`
                         <button type="button" class="list-group-item list-group-item-action ${selectedClass} answer_index_${i}" onclick="answerClick(${answer.id}, ${i})">
-                            ${answer.answer}
+                            ${content}
                         </button>
                     `)                    
                 }
