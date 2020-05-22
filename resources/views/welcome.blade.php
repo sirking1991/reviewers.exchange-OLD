@@ -81,6 +81,8 @@
 
             <div class="content">
                 <div class="title m-b-md">
+                    <img height="300" src="https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/logo.jpg" alt="Lares logo" />
+                    <br/>
                     {{ config('app.name', 'Laravel') }}
                 </div>
 
