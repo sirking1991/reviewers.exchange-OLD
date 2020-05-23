@@ -183,7 +183,6 @@ class ReviewersPurchasedComponent extends Component
                 });
             }
 
-            
             var examHtml = `
                 <div class='row'>
                     <div class='col-md-12 questionnaire-group'>Questionnaire group</div>
@@ -198,29 +197,10 @@ class ReviewersPurchasedComponent extends Component
             var examSummaryHtml = `
                 <div class='row p-3'>
                     <div class='score' style='font-size:xx-large'></div>
-                </div>
-                <div class='row p-3 text-muted'>
-                    Here are the questions that you didn't answer correctly
-                </div>
-                <div class='row p-3 wrong_answers'>
-                    <div class='col-md-12>                        
-                        <div class="accordion" id="accordionAnswers">
-                            <div class="card">
-                                <div class="card-header" id="headingOne">
-                                    <h2 class="mb-0">
-                                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        Collapsible Group Item #1
-                                        </button>
-                                    </h2>
-                                </div>
-
-                                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionAnswers">
-                                    <div class="card-body">
-                                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                                    </div>
-                                </div>
-                            </div>                                                                                                                
-                        </div>
+                </div>                
+                <div class='row p-3'>
+                    <div class='text-muted wrongAnswerCount'></div>
+                    <div class='col-md-12 wrong_answers'>                        
                     </div>
                 </div>
             `;
@@ -269,51 +249,53 @@ class ReviewersPurchasedComponent extends Component
                 $('#practiceExamModal .modal-footer .submit-answers-btn').hide();
                 $('#practiceExamModal .modal-footer .close-btn').show();
 
-                $(`#practiceExamModal .modal-body .wrong_answers .accordion`).html(``);
+                $(`.wrong_answers .card`).remove();
                 
                 // process answers                
                 var correctAnswers = 0;
+                
                 var wrongAnswers = 0;
                 var wrongAnsweredQuestions = [];
+                var wrongAnswersHtml = ``;             
                 for(var q=0; q<examData.questionnaire.length; q++){
                     var question = examData.questionnaire[q];
                     // assume correct, unless any of the answer did not match
                     var isCorrect = true;
+                    var correctAnswersList = [];
                     for(var ai=0; ai<question.answers.length; ai++){
+                        if('yes'==question.answers[ai].is_correct) {
+                            correctAnswersList.push(question.answers[ai]);
+                        }
                         if('yes'==question.answers[ai].is_correct && undefined==question.answers[ai].selected){
                             isCorrect = false;
-                            break;
                         }
                         if('no'==question.answers[ai].is_correct && 'yes'==question.answers[ai].selected){
                             isCorrect = false;
-                            break;
-                        }
+                        }                        
                     }
                     question.correctly_answered = isCorrect ? 'yes' : 'no';
                     if(isCorrect) {
-                        correctAnswers++;
+                        correctAnswers++;                        
                     } else {
                         wrongAnswers++;
                         wrongAnsweredQuestions.push(question);
-                        $(`#practiceExamModal .modal-body .wrong_answers .accordion`).append(`
-                            <div class="card">
-                                <div class="card-header" id="heading_${question.id}">
-                                    <h2 class="mb-0">
-                                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_${question.id}" aria-expanded="true" aria-controls="collapse_${question.id}">
-                                        Question #${q+1}
-                                        </button>
-                                    </h2>
-                                </div>
-
-                                <div id="collapse_${question.id}" class="collapse show" aria-labelledby="heading_${question.id}" data-parent="#accordionAnswers">
-                                    <div class="card-body">
-                                        ${question.question}
-                                    </div>
-                                </div>
-                            </div>                        
-                        `);
+                        wrongAnswersHtml += `
+                            <div class="alert alert-danger" role="alert">
+                                <strong class="alert-heading">${question.question}</strong>
+                                <hr>
+                                `;
+                        wrongAnswersHtml += `<p class="mb-0"><li class='list-group'>`;
+                        for(var x=0; x<correctAnswersList.length; x++){
+                            var answer = correctAnswersList[x].answer;
+                            if(''!=correctAnswersList[x].image) answer = "<img src='https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/" + correctAnswersList[x].image + "' />"
+                            wrongAnswersHtml += `<li class="list-group-item list-group-item-danger">${answer}</li>`;
+                        }
+                        wrongAnswersHtml += `</li></p>`;
+                        wrongAnswersHtml += `</div>`;                        
                     }
                 }
+                $('.wrong_answers').html(wrongAnswersHtml);
+                $('.wrongAnswerCount').html(0==wrongAnswers?`<h3>Perfect! You answered all the questions correctly</h3>`:`Here are the questions that you didn't answer correctly`);
                 
                 axios.post('/saveExamResult', examData)
                     .then(function(resp){
@@ -327,7 +309,10 @@ class ReviewersPurchasedComponent extends Component
                 
                 $(`#practiceExamModal .modal-body .score`).html(`You got <span id='totalScore'></span> correct answer${correctAnswers>1?'s':''} out of ${examData.questionnaire.length} questions`);
 
-                animateValue("#totalScore", 0, correctAnswers, 3000);
+                if(0<correctAnswers)
+                    animateValue("#totalScore", 0, correctAnswers, 3000);
+                else 
+                    $("#totalScore").html('0');
             }
 
             function timerTick(){
