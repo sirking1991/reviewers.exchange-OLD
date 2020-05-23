@@ -26,41 +26,40 @@ class ReviewersForSale extends Component
     
         <div class="row justify-content-center">
             <div class="col-md">
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header">
-                    <div class='row'>
-                        <div class='col-md-4'>
-                            <h4>Reviewers available for sale</h4>
-                        </div>
-                        <div class='col-md-8'>
-                            <div class='row'>
-                                <div class='col-md-6'>
-                                    <input type='text' wire:model.debounce.250ms="search" class='form-control' placeholder='Search' />
+                        <div class='row'>
+                            <div class='col-md-4'>
+                                <h4>Reviewers available for sale</h4>
+                            </div>
+                            <div class='col-md-8'>
+                                <div class='row'>
+                                    <div class='col-md-6'>
+                                        <input type='text' wire:model.debounce.250ms="search" class='form-control' placeholder='Search' />
+                                    </div>
+                                    <div class='col-md-6'>
+                                        <select class='form-control'  wire:model="category" >
+                                            <option value=''>All</option>
+                                            <option value='accounting'>Accounting</option>
+                                            <option value='engineering'>Engineering</option>
+                                            <option value='civil-service'>Civil Service</option>
+                                            <option value='college-entrance-exam'>College Entrance Exams</option>
+                                            <option value='nursing'>Nursing</option>
+                                            <option value='medecine'>Medicine</option>
+                                            <option value='education'>Education</option>
+                                            <option value='law'>Law</option>
+                                            <option value='others'>Others</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class='col-md-6'>
-                                <select class='form-control'  wire:model="category" >
-                                    <option value=''>All</option>
-                                    <option value='accounting'>Accounting</option>
-                                    <option value='engineering'>Engineering</option>
-                                    <option value='civil-service'>Civil Service</option>
-                                    <option value='college-entrance-exam'>College Entrance Exams</option>
-                                    <option value='nursing'>Nursing</option>
-                                    <option value='medecine'>Medicine</option>
-                                    <option value='education'>Education</option>
-                                    <option value='law'>Law</option>
-                                    <option value='others'>Others</option>
-                                </select>
-                                </div>
+                            </div>
                         </div>
-                    </div>
                     </div>
                     <div class="card-body horizontal-scroll">
                     @if(0 < count($reviewers))
                         @foreach($reviewers as $index => $r)
-                        @php
-                            $sellingPrice = $r->price +  ( env('PAYMAYA_ADDON_AMOUNT')  + (env('PAYMAYA_ADDON_RATE') * $r->price)  + (env('CONVINIENCE_FEE_RATE') * $r->price) );
-                        @endphp
-                        <div class="card">
+                        @php $sellingPrice = $r->price +  ( env('PAYMAYA_ADDON_AMOUNT')  + (env('PAYMAYA_ADDON_RATE') * $r->price)  + (env('CONVINIENCE_FEE_RATE') * $r->price) ); @endphp
+                        <div class="card shadow-sm  rounded-lg">
                             <img src="{{ $r->cover_photo }}" class="card-img-top" alt="...">
                             <div class="card-body wrapword">
                                 <p class='name'>{{ $r->name }}</p>

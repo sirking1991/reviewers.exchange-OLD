@@ -31,14 +31,14 @@ class ReviewersPurchasedComponent extends Component
         <div class="row justify-content-center">
             <div class="col-md ">
                 @if(0 < count($reviewersPurchased))
-                    <div class="card">
+                    <div class="card shadow-sm">
                         <div class="card-header"><h4>Reviewers you've purchased</h4></div>
                         <div class="card-body horizontal-scroll">
                             @foreach($reviewersPurchased as $index => $rp)
-                            <div class="card" onclick="openPurchasedReviewerDialog({{ $index }})">
-                                <img src="{{ $rp->reviewer->cover_photo }}" class="card-img-top" alt="...">
-                                <div class="card-body wrapword">{{ $rp->reviewer->name }}</div>
-                            </div>
+                                <div class="card shadow-sm rounded-lg" onclick="openPurchasedReviewerDialog({{ $index }})">
+                                    <img src="{{ $rp->reviewer->cover_photo }}" class="card-img-top" alt="...">
+                                    <div class="card-body wrapword">{{ $rp->reviewer->name }}</div>
+                                </div>
                             @endforeach
                         </div>
                     </div>
