@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
 /*
@@ -14,7 +13,6 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-use Aceraven777\PayMaya\PayMayaSDK;
 Artisan::command('paymaya:webhooks-set', function () {
 
     $url = $this->ask('Base URL');
@@ -33,4 +31,49 @@ Artisan::command('paymaya:webhooks-list', function(){
     foreach ($list as $wh) {
         dump($wh);
     }
+});
+
+use Luigel\Paymongo\Facades\Paymongo;
+Artisan::command('paymongo:test-payment', function(){
+    $paymentMethod = Paymongo::paymentMethod()->create([
+        'type' => 'card',
+        'details' => [
+            'card_number' => '4343434343434345',
+            'exp_month' => 12,
+            'exp_year' => 25,
+            'cvc' => "123",
+        ],
+        'billing' => [
+            'address' => [
+                'line1' => 'Somewhere there',
+                'city' => 'Pasay City',
+                'state' => 'NCR',
+                'country' => 'PH',
+                'postal_code' => '1300',
+            ],
+            'name' => 'Sherwin de Jesus',
+            'email' => 'sirking1991@gmail.com',
+            'phone' => '09204759976'
+        ],
+    ]);    
+
+    $paymentIntent = Paymongo::paymentIntent()->create([
+        'amount' => 100,
+        'payment_method_allowed' => [
+            'card'
+        ],
+        'payment_method_options' => [
+            'card' => [
+                'request_three_d_secure' => 'automatic'
+            ]
+        ],
+        'description' => 'This is a test payment intent',
+        'statement_descriptor' => 'LUIGEL STORE',
+        'currency' => "PHP",
+    ]);
+
+    // Attached the payment method to the payment intent
+    $successfulPayment = $paymentIntent->attach($paymentMethod->{'id'});
+
+    dump($successfulPayment);
 });

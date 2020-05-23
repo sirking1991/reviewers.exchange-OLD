@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c6d7cfd6ce11857e2c413ee955925b65",
+    "content-hash": "dbc18472fb6fa9fded169a67db31abf7",
     "packages": [
         {
             "name": "aceraven777/laravel-paymaya",
@@ -1422,6 +1422,71 @@
             ],
             "description": "A front-end framework for Laravel.",
             "time": "2020-04-27T13:47:28+00:00"
+        },
+        {
+            "name": "luigel/laravel-paymongo",
+            "version": "v1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/luigel/laravel-paymongo.git",
+                "reference": "fe79318d0c4d49c9f4dbc9eb54ed7e2d11e59423"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/luigel/laravel-paymongo/zipball/fe79318d0c4d49c9f4dbc9eb54ed7e2d11e59423",
+                "reference": "fe79318d0c4d49c9f4dbc9eb54ed7e2d11e59423",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.0|^7.0",
+                "illuminate/support": "5.*|^6.0|^7.0",
+                "php": "^7.0|^7.2|^7.3|^7.4"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^3.5.0|^3.6.0|^4.0|^5.0",
+                "phpunit/phpunit": "^5.0|^6.0|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Luigel\\Paymongo\\PaymongoServiceProvider"
+                    ],
+                    "aliases": {
+                        "Paymongo": "Luigel\\Paymongo\\Facades\\PaymongoFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Luigel\\Paymongo\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rigel Kent Carbonel",
+                    "email": "rigel20.kent@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A laravel wrapper for Paymongo API",
+            "homepage": "https://github.com/luigel/laravel-paymongo",
+            "keywords": [
+                "credit-cards",
+                "debit-cards",
+                "gcash",
+                "grabcar",
+                "laravel",
+                "laravel-paymongo",
+                "luigel",
+                "payment-gateway",
+                "paymongo"
+            ],
+            "time": "2020-04-25T03:23:04+00:00"
         },
         {
             "name": "monolog/monolog",

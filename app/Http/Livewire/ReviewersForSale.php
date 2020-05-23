@@ -1,44 +1,61 @@
 <?php
 
-namespace App\View\Components;
+namespace App\Http\Livewire;
 
-use Illuminate\View\Component;
-use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
-class ReviewersAvailableForSaleComponent extends Component
+class ReviewersForSale extends Component
 {
     public $reviewers;
-    /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        // $this->reviewers = \App\Reviewer::all();
-        $this->reviewers = DB::select("
-                        SELECT * FROM reviewers 
-                        WHERE status='active'
-                            AND id NOT IN (SELECT reviewer_id 
-                                            FROM reviewer_purchases 
-                                            WHERE user_id=" . Auth()->user()->id . " AND status='success')");
-                
-    }
+    public $search;
+    public $category;
 
-    /**
-     * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\View\View|string
-     */
     public function render()
     {
+        $this->reviewers = \App\Reviewer::where('status', 'active')
+            ->when(3 <= strlen($this->search), function ($query) {
+                return $query->where('name', 'like', "%$this->search%");
+            })
+            ->when('' != strlen($this->category), function ($query) {
+                return $query->where('category', 'like', "%$this->category%");
+            })
+            ->whereRaw("id NOT IN (SELECT reviewer_id FROM reviewer_purchases WHERE user_id=" . Auth()->user()->id . " AND status='success')")
+            ->get();
+
         return <<<'blade'
     
         <div class="row justify-content-center">
             <div class="col-md">
                 <div class="card">
-                    <div class="card-header"><h4>Reviewers available for sale</h4></div>
+                    <div class="card-header">
+                    <div class='row'>
+                        <div class='col-md-4'>
+                            <h4>Reviewers available for sale</h4>
+                        </div>
+                        <div class='col-md-8'>
+                            <div class='row'>
+                                <div class='col-md-6'>
+                                    <input type='text' wire:model.debounce.250ms="search" class='form-control' placeholder='Search' />
+                                </div>
+                                <div class='col-md-6'>
+                                <select class='form-control'  wire:model="category" >
+                                    <option value=''>All</option>
+                                    <option value='accounting'>Accounting</option>
+                                    <option value='engineering'>Engineering</option>
+                                    <option value='civil-service'>Civil Service</option>
+                                    <option value='college-entrance-exam'>College Entrance Exams</option>
+                                    <option value='nursing'>Nursing</option>
+                                    <option value='medecine'>Medicine</option>
+                                    <option value='education'>Education</option>
+                                    <option value='law'>Law</option>
+                                    <option value='others'>Others</option>
+                                </select>
+                                </div>
+                        </div>
+                    </div>
+                    </div>
                     <div class="card-body horizontal-scroll">
+                    @if(0 < count($reviewers))
                         @foreach($reviewers as $index => $r)
                         @php
                             $sellingPrice = $r->price +  ( env('PAYMAYA_ADDON_AMOUNT')  + (env('PAYMAYA_ADDON_RATE') * $r->price)  + (env('CONVINIENCE_FEE_RATE') * $r->price) );
@@ -53,6 +70,11 @@ class ReviewersAvailableForSaleComponent extends Component
                             </div>
                         </div>
                         @endforeach
+                    @else
+                        <div class="alert alert-secondary" role="alert">
+                            {{ __('No reviewers for this creteria was found') }}
+                        </div>
+                    @endif
                     </div>
                 </div>
             </div>
