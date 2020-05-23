@@ -48,7 +48,7 @@ Route::middleware(['auth'])->group(function(){
 Route::middleware([])->group(function(){
     Route::get('/paymaya/checkout', 'PaymayaController@checkout')->name('paymaya-checkout');
     Route::post('/paymaya/callback/{status}', 'PaymayaController@callback');
-    Route::match(['post', 'put', 'get'], '/paymaya/redirectUrl/{status}/{reference}', 'PaymayaController@redirect');
+    Route::get('/paymaya/redirectUrl/{status}/{reference}', 'PaymayaController@redirect');
 });
 
 
