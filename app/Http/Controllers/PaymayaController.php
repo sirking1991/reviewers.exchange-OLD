@@ -48,6 +48,8 @@ class PaymayaController extends Controller
         $dropoutWebhook->callbackUrl = $url . '/paymaya/callback/dropout';
         $result = $dropoutWebhook->register();
         Log::info('payamay dropout webhook setup', ['result'=>$result]);
+
+        $this->customizeMerchantPage();
     }
     
     public function clearWebhooks()
@@ -101,11 +103,13 @@ class PaymayaController extends Controller
     
         $shopCustomization = new Customization();
         $shopCustomization->get();
+
+        Log::debug('Payamya customiseMerchantPage', ['customization'=>$shopCustomization]);
     
-        $shopCustomization->logoUrl = asset('logo.jpg');
-        $shopCustomization->iconUrl = asset('favicon.ico');
-        $shopCustomization->appleTouchIconUrl = asset('favicon.ico');
-        $shopCustomization->customTitle = 'PayMaya Payment Gateway';
+        $shopCustomization->logoUrl = 'https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/logo.jpg';
+        // $shopCustomization->iconUrl = asset('favicon.ico');
+        // $shopCustomization->appleTouchIconUrl = asset('favicon.ico');
+        $shopCustomization->customTitle = env('APP_NAME');
         $shopCustomization->colorScheme = '#f3dc2a';
     
         $shopCustomization->set();
