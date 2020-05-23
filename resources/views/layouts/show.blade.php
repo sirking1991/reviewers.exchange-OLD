@@ -20,7 +20,7 @@
                     </div>
 
                     <div class="card-body">
-                        {!! Form::open(['id'=>'main']) !!}
+                        {!! Form::open(['id'=>'main', 'enctype'=>'multipart/form-data']) !!}
 
                             @yield('card-body')
 

@@ -43,9 +43,9 @@ class ReviewersForSale extends Component
                                             <option value='accounting'>Accounting</option>
                                             <option value='engineering'>Engineering</option>
                                             <option value='civil-service'>Civil Service</option>
-                                            <option value='college-entrance-exam'>College Entrance Exams</option>
+                                            <option value='entrance-exam'>Entrance Exams</option>
                                             <option value='nursing'>Nursing</option>
-                                            <option value='medecine'>Medicine</option>
+                                            <option value='medicine'>Medicine</option>
                                             <option value='education'>Education</option>
                                             <option value='law'>Law</option>
                                             <option value='others'>Others</option>

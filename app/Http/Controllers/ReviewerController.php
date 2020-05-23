@@ -73,16 +73,39 @@ class ReviewerController extends Controller
         if (!$record) {
             $record = new Reviewer();
             $record->user_id = Auth()->user()->id;
-            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1,10) . ".jpg";
+            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
         }
 
-        if(''==$record->cover_photo)
-            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1,10) . ".jpg";
+        if ('' == $record->cover_photo)
+            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
         $record->name = $request->reviewer_name;
         $record->status = $request->status;
+        $record->category = $request->category;
         $record->questionnaires_to_display = $request->questionnaires_to_display;
         $record->time_limit = $request->time_limit;
         $record->price = $request->price;
+
+        if (isset($request->remove_cover_photo) && 'yes' == $request->remove_cover_photo) {            
+            try {
+                Log::debug('deleting cover photo');
+                // if not a common cover photo, then delete
+                if (false === strpos($record->cover_photo, 'common/reviewers_bg/bg_')) $this->deleteImage($record->cover_photo);
+                // set random cover_photo
+                $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
+                Log::debug('cover photo set to '.$record->cover_photo);
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        if ('undefined' != $request->cover_photo && '' != $request->cover_photo  ) {
+            try {
+                $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/" . $this->uploadImage('images/reviewers/cover_photo', $request->cover_photo);
+                Log::debug('cover photo set to '.$record->cover_photo);
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+            }
+        }        
         $record->save();
 
         $request->session()->flash('status', 'Record saved');
@@ -120,7 +143,7 @@ class ReviewerController extends Controller
                 $answers = json_decode($request->input('answers'));
                 $correctAnswerCount = 0;
                 foreach ($answers  as $index => $answer) {
-                    if ('yes'==$answer->is_correct) $correctAnswerCount++;
+                    if ('yes' == $answer->is_correct) $correctAnswerCount++;
                     $ans = \App\Answer::create([
                         'questionnaire_id' => $question->id,
                         'answer' => $answer->answer,
@@ -140,7 +163,6 @@ class ReviewerController extends Controller
                 $question->correct_answer_count = $correctAnswerCount;
                 $question->save();
             }
-
         } else {
             Log::debug('updating question record');
             $question = \App\Questionnaire::where('user_id', Auth()->user()->id)
@@ -161,7 +183,7 @@ class ReviewerController extends Controller
                 $safeAnswerId = [];
                 $correctAnswerCount = 0;
                 foreach ($answers  as $index => $answer) {
-                    if ('yes'==$answer->is_correct) $correctAnswerCount++;
+                    if ('yes' == $answer->is_correct) $correctAnswerCount++;
                     if (isset($answer->id)) {
                         \App\Answer::where('id', $answer->id)
                             ->update([
@@ -200,7 +222,7 @@ class ReviewerController extends Controller
                     }
                 }
                 $question->correct_answer_count = $correctAnswerCount;
-                $question->save();                
+                $question->save();
                 // delete other answers that where not part of the answer submitted
                 \App\Answer::where('questionnaire_id', $questionId)->whereNotIn('id', $safeAnswerId)->delete();
             } else {
@@ -247,7 +269,7 @@ class ReviewerController extends Controller
     }
 
     private function uploadImage(String $fileUnder, $image)
-    {        
+    {
         try {
             return Storage::disk('s3')->put(env('APP_ENV') . '/' . $fileUnder, $image, 'public');
         } catch (\Exception $e) {
@@ -354,7 +376,7 @@ class ReviewerController extends Controller
         $reviewerPurchased = \App\ReviewerPurchase::where('user_id', Auth()->user()->id)
             ->where('reviewer_id',  $reviewer->id)
             ->get();
-        if(0==count($reviewerPurchased)) return response('User has not purchased the reviewer', 404);
+        if (0 == count($reviewerPurchased)) return response('User has not purchased the reviewer', 404);
 
         $questionnaires = \App\Questionnaire::where('reviewer_id', $reviewer->id)
             ->where('correct_answer_count', '>', 0)
@@ -364,7 +386,7 @@ class ReviewerController extends Controller
             ->with('questionnaireGroup')
             ->get();
 
-        return response()->json(['reviewer'=>$reviewer, 'questionnaire'=>$questionnaires]);
+        return response()->json(['reviewer' => $reviewer, 'questionnaire' => $questionnaires]);
     }
 
     public function saveExamResult(Request $request)
@@ -380,8 +402,8 @@ class ReviewerController extends Controller
         $correct = 0;
         $wrong = 0;
         foreach ($request->questionnaire as $question) {
-            if ('yes'==$question['correctly_answered']) $correct++;
-            if ('no'==$question['correctly_answered']) $wrong++;
+            if ('yes' == $question['correctly_answered']) $correct++;
+            if ('no' == $question['correctly_answered']) $wrong++;
             \App\ExamResultQuestionAnswer::create([
                 'exam_result_id' => $examResult->id,
                 'questionnaire_id' => $question['id'],
@@ -400,30 +422,30 @@ class ReviewerController extends Controller
     public function userExamSummary(Request $request, $reviewerId)
     {
         return response()->json([
-            'questions'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('questions'),
-            'correct_answers'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('correct_answers'),
-            'wrong_answers'=>\App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('wrong_answers'),
-            ]);
+            'questions' => \App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('questions'),
+            'correct_answers' => \App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('correct_answers'),
+            'wrong_answers' => \App\ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('wrong_answers'),
+        ]);
     }
 
     public function buyReviewer($reviewerId)
     {
         // TODO: check if user has no yet purchase this reviewer
         $reviewer = \App\Reviewer::find($reviewerId);
-        if(!$reviewer) return redirect('home');
+        if (!$reviewer) return redirect('home');
 
         // create the item and customer object
         $itemName = $reviewer->name;
-        $totalPrice = $reviewer->price + 
-                        (env('PAYMAYA_ADDON_AMOUNT') 
-                        + (env('PAYMAYA_ADDON_RATE') * $reviewer->price) 
-                        + (env('CONVINIENCE_FEE_RATE') * $reviewer->price));
-    
+        $totalPrice = $reviewer->price +
+            (env('PAYMAYA_ADDON_AMOUNT')
+                + (env('PAYMAYA_ADDON_RATE') * $reviewer->price)
+                + (env('CONVINIENCE_FEE_RATE') * $reviewer->price));
+
         $userPhone = '';
         $userEmail = Auth()->user()->email;
-        
+
         $reference = Auth()->user()->id . '-' . date('YmdHis');
-    
+
         // Item
         $itemAmountDetails = new ItemAmountDetails();
         $itemAmountDetails->tax = "0.00";
@@ -435,8 +457,8 @@ class ReviewerController extends Controller
         $item = new Item();
         $item->name = $itemName;
         $item->amount = $itemAmount;
-        $item->totalAmount = $itemAmount;    
-        
+        $item->totalAmount = $itemAmount;
+
         $user = new PayMayaUser();
         $user->contact->phone = $userPhone;
         $user->contact->email = $userEmail;
@@ -445,9 +467,9 @@ class ReviewerController extends Controller
 
         $checkout = $paymaya->checkout($user, $item, $itemAmount, $reference);
         $gatewayPaymentObject = $checkout->retrieve();
-        
+
         // cancell all 'pending' order
-        \App\ReviewerPurchase::where('user_id', Auth()->user()->id)->where('status', 'pending')->update(['status'=>'cancelled']);
+        \App\ReviewerPurchase::where('user_id', Auth()->user()->id)->where('status', 'pending')->update(['status' => 'cancelled']);
 
         // create new order
         \App\ReviewerPurchase::create([
