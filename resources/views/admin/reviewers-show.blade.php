@@ -90,8 +90,8 @@
                 @if (''!=$record->cover_photo)
                     <label class="control-label">Existing image <input type='button' class="btn btn-sm btn-danger" onclick="removeCoverPhoto()" value='Remove' /></label>
                     <br/>
-                    <a href="{{ $record->cover_photo }}" target="cover_photo">
-                        <img height="60px" src="{{ $record->cover_photo }}">
+                    <a href="{{ env('AWS_S3_URL') . $record->cover_photo }}" target="cover_photo">
+                        <img height="60px" src="{{ env('AWS_S3_URL') . $record->cover_photo }}">
                     </a>                    
                 @endif
 

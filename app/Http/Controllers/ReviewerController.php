@@ -73,11 +73,11 @@ class ReviewerController extends Controller
         if (!$record) {
             $record = new Reviewer();
             $record->user_id = Auth()->user()->id;
-            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
+            $record->cover_photo = "common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
         }
 
         if ('' == $record->cover_photo)
-            $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
+            $record->cover_photo = "common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
         $record->name = $request->reviewer_name;
         $record->status = $request->status;
         $record->category = $request->category;
@@ -91,7 +91,7 @@ class ReviewerController extends Controller
                 // if not a common cover photo, then delete
                 if (false === strpos($record->cover_photo, 'common/reviewers_bg/bg_')) $this->deleteImage($record->cover_photo);
                 // set random cover_photo
-                $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
+                $record->cover_photo = "common/reviewers_bg/bg_" . rand(1, 10) . ".jpg";
                 Log::debug('cover photo set to '.$record->cover_photo);
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
@@ -100,7 +100,7 @@ class ReviewerController extends Controller
 
         if ('undefined' != $request->cover_photo && '' != $request->cover_photo  ) {
             try {
-                $record->cover_photo = "https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/" . $this->uploadImage('images/reviewers/cover_photo', $request->cover_photo);
+                $record->cover_photo = $this->uploadImage('images/reviewers/cover_photo', $request->cover_photo);
                 Log::debug('cover photo set to '.$record->cover_photo);
             } catch (\Exception $e) {
                 Log::error($e->getMessage());

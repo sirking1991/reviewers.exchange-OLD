@@ -36,7 +36,7 @@ class ReviewersPurchasedComponent extends Component
                         <div class="card-body horizontal-scroll">
                             @foreach($reviewersPurchased as $index => $rp)
                                 <div class="card shadow-sm rounded-lg" onclick="openPurchasedReviewerDialog({{ $index }})">
-                                    <img src="{{ $rp->reviewer->cover_photo }}" class="card-img-top" alt="...">
+                                    <img src="{{ env('AWS_S3_URL') . $rp->reviewer->cover_photo }}" class="card-img-top" alt="...">
                                     <div class="card-body wrapword">{{ $rp->reviewer->name }}</div>
                                 </div>
                             @endforeach
@@ -152,7 +152,7 @@ class ReviewersPurchasedComponent extends Component
 
                 selectedReviewerPurchased = this.reviewers[index];
                 $('#reviewerPurchasedModal p.reviewer-title').html(selectedReviewerPurchased.reviewer.name);
-                $('#reviewerPurchasedModal img.cover-photo').attr('src', selectedReviewerPurchased.reviewer.cover_photo);
+                $('#reviewerPurchasedModal img.cover-photo').attr('src', '{!! env('AWS_S3_URL') !!}' + selectedReviewerPurchased.reviewer.cover_photo);
                 $('#reviewerPurchasedModal').modal('show');
             }
 

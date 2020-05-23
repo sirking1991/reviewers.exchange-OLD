@@ -60,7 +60,7 @@ class ReviewersForSale extends Component
                         @foreach($reviewers as $index => $r)
                         @php $sellingPrice = $r->price +  ( env('PAYMAYA_ADDON_AMOUNT')  + (env('PAYMAYA_ADDON_RATE') * $r->price)  + (env('CONVINIENCE_FEE_RATE') * $r->price) ); @endphp
                         <div class="card shadow-sm  rounded-lg">
-                            <img src="{{ $r->cover_photo }}" class="card-img-top" alt="...">
+                            <img src="{{ env('AWS_S3_URL') . $r->cover_photo }}" class="card-img-top" alt="...">
                             <div class="card-body wrapword">
                                 <p class='name'>{{ $r->name }}</p>
                                 <p class='selling-price'>                                    
