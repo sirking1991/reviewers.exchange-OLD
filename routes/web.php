@@ -14,26 +14,26 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
 
 Auth::routes();
 
+Route::get('/', 'HomeController@index');
+
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::middleware(['checkifadmin'])->group(function () {
-    Route::get('/admin/reviewers/list', 'ReviewerController@adminList')->name('/admin/reviewers/list');
-    Route::get('/admin/reviewers/{id?}', 'ReviewerController@adminShow');
-    Route::match(['post', 'put'], '/admin/reviewers/{id?}', 'ReviewerController@save');    
-    Route::get('/admin/reviewers/{id}/delete', 'ReviewerController@delete');
+Route::middleware(['checkifpublisher'])->group(function () {
+    Route::get('/publisher/reviewers/list', 'PublisherController@reviewerList')->name('/publisher/reviewers/list');
+    Route::get('/publisher/reviewers/{id?}', 'PublisherController@reviewerShow');
+    Route::match(['post', 'put'], '/publisher/reviewers/{id?}', 'PublisherController@reviewerSave');    
+    Route::get('/publisher/reviewers/{id}/delete', 'PublisherController@reviewerDelete');
     
-    Route::match(['post', 'put'], '/admin/reviewers/{reviewerId}/question/{id?}', 'ReviewerController@saveQuestion');
-    Route::match(['delete'], '/admin/reviewers/{reviewerId}/question/{id?}', 'ReviewerController@deleteQuestion');
+    Route::match(['post', 'put'], '/publisher/reviewers/{reviewerId}/question/{id?}', 'PublisherController@saveQuestion');
+    Route::match(['delete'], '/publisher/reviewers/{reviewerId}/question/{id?}', 'PublisherController@deleteQuestion');
     
-    Route::get('/admin/reviewers/{reviewerId}/questionnaire-groups', 'ReviewerController@questionnaireGroups' );
-    Route::match(['post', 'put'], '/admin/reviewers/{reviewerId}/questionnaire-group/{id?}', 'ReviewerController@questionnaireGroupSave' );
-    Route::match(['delete'], '/admin/reviewers/{reviewerId}/questionnaire-group/{id}', 'ReviewerController@questionnaireGroupDelete' );
+    Route::get('/publisher/reviewers/{reviewerId}/questionnaire-groups', 'PublisherController@questionnaireGroups' );
+    Route::match(['post', 'put'], '/publisher/reviewers/{reviewerId}/questionnaire-group/{id?}', 'PublisherController@questionnaireGroupSave' );
+    Route::match(['delete'], '/publisher/reviewers/{reviewerId}/questionnaire-group/{id}', 'PublisherController@questionnaireGroupDelete' );
     
 });
 

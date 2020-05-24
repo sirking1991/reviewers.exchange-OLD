@@ -110,19 +110,21 @@
      
     </div>  
 
+
+    <script type="text/javascript">      
+
+        document.addEventListener('DOMContentLoaded', function(){ 
+    
+            removeCoverPhoto = function(){
+                $('.existingImg input[name=remove_cover_photo]').val('yes');
+                $('.existingImg').hide();            
+            }
+        }, false);
+    
+    
+    </script>    
 @endsection
 
 
 
-<script type="text/javascript">      
 
-    document.addEventListener('DOMContentLoaded', function(){ 
-
-        removeCoverPhoto = function(){
-            $('.existingImg input[name=remove_cover_photo]').val('yes');
-            $('.existingImg').hide();            
-        }
-    }, false);
-
-
-</script>

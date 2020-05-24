@@ -369,7 +369,7 @@
             }            
         }
         $.ajax({
-            url: '/admin/reviewers/{{ $reviewerId }}/question/' + questionId,
+            url: '/publisher/reviewers/{{ $reviewerId }}/question/' + questionId,
             method: 'POST',
             processData: false,
             contentType: false,
@@ -393,7 +393,7 @@
         $('#deleteQuestionBtn').html("Deleting...");
         $('#deleteQuestionBtn').addClass('disabled');
         $.ajax({
-            url: '/admin/reviewers/{{ $reviewerId }}/question/' + selectedQuestion.id,
+            url: '/publisher/reviewers/{{ $reviewerId }}/question/' + selectedQuestion.id,
             method: 'DELETE',
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
@@ -540,7 +540,7 @@
         $('#saveQuestionnaireGroupBtn').html("Saving...");
         $('#saveQuestionnaireGroupBtn').addClass('disabled');
         $.ajax({
-            url: '/admin/reviewers/{{ $reviewerId }}/questionnaire-group/' + id,
+            url: '/publisher/reviewers/{{ $reviewerId }}/questionnaire-group/' + id,
             method: 'POST',
             data: data,
             dataType: 'json',       
@@ -561,7 +561,7 @@
         $('#deleteQuestionnaireGroupBtn').html("Deleting...");
         $('#deleteQuestionnaireGroupBtn').addClass('disabled');
         $.ajax({
-            url: '/admin/reviewers/{{ $reviewerId }}/questionnaire-group/' + selectedQuestionnaireGroup.id,
+            url: '/publisher/reviewers/{{ $reviewerId }}/questionnaire-group/' + selectedQuestionnaireGroup.id,
             method: 'DELETE',
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){

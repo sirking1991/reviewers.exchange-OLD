@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="{{ url('/home') }}">
-            <img src="https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+            <img src="{{ env('AWS_S3_URL') }}common/logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
             {{ config('app.name', 'Laravel') }}
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -11,10 +11,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             @auth
-                @if ('admin' == Auth::user()->type)
+                @if ('publisher' == Auth::user()->type)
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('/admin/reviewers/list') }}">{{ __('Reviewers') }}</a>
+                            <a class="nav-link" href="{{ route('/publisher/reviewers/list') }}">{{ __('Reviewers') }}</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="">{{ __('Reviewer sales') }}</a>

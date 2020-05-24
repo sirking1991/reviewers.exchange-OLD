@@ -23,8 +23,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return 'admin'==Auth()->user()->type 
-                    ? view('admin.home') 
+        return 'publisher'==Auth()->user()->type 
+                    ? view('publisher.home') 
                     : view('reviewer.home');
         
     }

@@ -5,7 +5,7 @@
 @endsection
 
 @section('action-buttons')
-    <button class="btn btn-sm btn-primary float-right" onclick="window.open('/admin/reviewers/')"><i class="fas fa-plus"></i>Create new</button>
+    <button class="btn btn-sm btn-primary float-right" onclick="window.open('/publisher/reviewers/')"><i class="fas fa-plus"></i>Create new</button>
 @endsection
 
 @section('table-header')
@@ -19,7 +19,7 @@
 
 @section('table-body')
     @foreach ($list as $l)
-    <tr class='clickable'  onclick="window.open('{{ '/admin/reviewers/'.$l->id }}', '{{ $l->id }}')">
+    <tr class='clickable'  onclick="window.open('{{ '/publisher/reviewers/'.$l->id }}', '{{ $l->id }}')">
         <td>{{ $l->name }}</td>        
         <td>
             @if ('active'==$l->status)
