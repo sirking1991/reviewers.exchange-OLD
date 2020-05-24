@@ -35,19 +35,19 @@ class PaymayaController extends Controller
         $successWebhook->name = Webhook::CHECKOUT_SUCCESS;
         $successWebhook->callbackUrl = $url . '/paymaya/callback/success';
         $result = $successWebhook->register();
-        Log::info('payamay success webhook setup', ['result'=>$result]);
+        Log::info('paymaya success webhook setup', ['result'=>$result]);
     
         $failureWebhook = new Webhook();
         $failureWebhook->name = Webhook::CHECKOUT_FAILURE;
         $failureWebhook->callbackUrl = $url . '/paymaya/callback/error';
         $result = $failureWebhook->register();
-        Log::info('payamay failure webhook setup', ['result'=>$result]);
+        Log::info('paymaya failure webhook setup', ['result'=>$result]);
     
         $dropoutWebhook = new Webhook();
         $dropoutWebhook->name = Webhook::CHECKOUT_DROPOUT;
         $dropoutWebhook->callbackUrl = $url . '/paymaya/callback/dropout';
         $result = $dropoutWebhook->register();
-        Log::info('payamay dropout webhook setup', ['result'=>$result]);
+        Log::info('paymaya dropout webhook setup', ['result'=>$result]);
 
         $this->customizeMerchantPage();
     }
@@ -104,9 +104,9 @@ class PaymayaController extends Controller
         $shopCustomization = new Customization();
         $shopCustomization->get();
 
-        Log::debug('Payamya customiseMerchantPage', ['customization'=>$shopCustomization]);
+        Log::debug('Paymaya customiseMerchantPage', ['customization'=>$shopCustomization]);
     
-        $shopCustomization->logoUrl = 'https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/logo.jpg';
+        $shopCustomization->logoUrl = env('AWS_S3_URL') . 'common/logo.jpg';
         // $shopCustomization->iconUrl = asset('favicon.ico');
         // $shopCustomization->appleTouchIconUrl = asset('favicon.ico');
         $shopCustomization->customTitle = env('APP_NAME');
