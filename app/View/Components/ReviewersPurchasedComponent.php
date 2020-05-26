@@ -287,7 +287,7 @@ class ReviewersPurchasedComponent extends Component
                         wrongAnswersHtml += `<p class="mb-0"><li class='list-group'>`;
                         for(var x=0; x<correctAnswersList.length; x++){
                             var answer = correctAnswersList[x].answer;
-                            if(''!=correctAnswersList[x].image) answer = "<img src='https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/" + correctAnswersList[x].image + "' />"
+                            if(''!=correctAnswersList[x].image) answer = "<img src='{{ env('AWS_S3_URL') }}" + correctAnswersList[x].image + "' />"
                             wrongAnswersHtml += `<li class="list-group-item list-group-item-danger">${answer}</li>`;
                         }
                         wrongAnswersHtml += `</li></p>`;
@@ -362,7 +362,7 @@ class ReviewersPurchasedComponent extends Component
                     var answer = currentQuestion.answers[i];
                     var selectedClass = (undefined!=answer.selected) ? selectedAnswerClass : '';  // lets mark the answer selected/unselected  
                     var content = '' != answer.image 
-                                        ? "<img src='https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/" + answer.image + "' />"
+                                        ? "<img src='{{ env('AWS_S3_URL') }}" + answer.image + "' />"
                                         : answer.answer;
                     $('#practiceExamModal .modal-body .answers').append(`
                         <button type="button" class="list-group-item list-group-item-action ${selectedClass} answer_index_${i}" onclick="answerClick(${answer.id}, ${i})">

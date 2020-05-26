@@ -13,22 +13,18 @@
             @auth
                 @if ('publisher' == Auth::user()->type)
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a class="nav-link" href="{{ route('/publisher/reviewers/list') }}">{{ __('Reviewers') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="">{{ __('Reviewer sales') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="">{{ __('Exams taken') }}</a>
-                        </li>
-                        {{-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#">Reviewer sales</a>
-                                <a class="dropdown-item" href="#">Exams taken</a>
-                            </div>
                         </li> --}}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/publisher/reviewer-list">{{ __('Reviewers') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/publisher/statement">{{ __('Statement of account') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/publisher/settings">{{ __('Settings') }}</a>
+                        </li>
                     </ul>                
                 @endif
             @endauth

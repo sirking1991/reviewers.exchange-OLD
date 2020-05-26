@@ -68,7 +68,7 @@ class ReviewersForSale extends Component
                                 <p class='name'>{{ $r->name }}</p>
                                 <p class='selling-price'>                                    
                                     @if(0>=$sellingPrice)
-                                        <button class='btn btn-danger btn-block' onclick="buyNow({{ $r->id }})">Free this for free!</button>
+                                        <button class='btn btn-danger btn-block' onclick="buyNow({{ $r->id }})">Get this for free!</button>
                                     @else
                                         <button class='btn btn-danger btn-block' onclick="buyNow({{ $r->id }})">Buy Now {{ number_format($sellingPrice, 2) }}</button>
                                     @endif

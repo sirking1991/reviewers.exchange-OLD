@@ -26,9 +26,8 @@
         </main>
     </div>
 
-    <livewire:scripts>
-
     <!-- Scripts -->
+    <livewire:scripts>
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="https://cdn.tiny.cloud/1/1fvr1maemph5703p8fk3zt83n40pusom3b73e36gyx2e2vsw/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
     
@@ -45,5 +44,7 @@
             });
         }        
     </script>
+
+    
 </body>
 </html>

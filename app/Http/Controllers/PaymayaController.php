@@ -104,15 +104,15 @@ class PaymayaController extends Controller
         $shopCustomization = new Customization();
         $shopCustomization->get();
 
-        Log::debug('Paymaya customiseMerchantPage', ['customization'=>$shopCustomization]);
-    
         $shopCustomization->logoUrl = env('AWS_S3_URL') . 'common/logo.jpg';
-        // $shopCustomization->iconUrl = asset('favicon.ico');
-        // $shopCustomization->appleTouchIconUrl = asset('favicon.ico');
+        $shopCustomization->iconUrl = env('AWS_S3_URL') . 'common/logo_sml.jpg';
+        $shopCustomization->appleTouchIconUrl = env('AWS_S3_URL') . 'common/logo_sml.jpg';
         $shopCustomization->customTitle = env('APP_NAME');
-        $shopCustomization->colorScheme = '#f3dc2a';
+        $shopCustomization->colorScheme = '#000000';
     
         $shopCustomization->set();
+
+        Log::debug('Paymaya customiseMerchantPage', ['customization'=>$shopCustomization, 'logo_url'=>env('AWS_S3_URL') . 'common/logo.jpg']);        
     }
     
     public function checkout($user, $item, $itemAmount, $reference)

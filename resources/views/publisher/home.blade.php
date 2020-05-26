@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md">
             <div class="card">
-                <div class="card-header">Publisher Dashboard</div>
+                <div class="card-header bg-primary text-white">Dashboard</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -14,7 +14,16 @@
                         </div>
                     @endif
 
-                    You are logged in!
+                    <div class="card-deck">
+                        @livewire('publisher-sales-this-month')
+                        @livewire('publisher-sales-this-year')
+                        @livewire('publisher-account-balance')
+                    </div>
+
+                    @livewire('publisher-best-seller')    
+
+                    @livewire('publisher-exam-stat')
+                    
                 </div>
             </div>
         </div>

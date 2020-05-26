@@ -23,7 +23,7 @@ Route::get('/', 'HomeController@index');
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::middleware(['checkifpublisher'])->group(function () {
-    Route::get('/publisher/reviewers/list', 'PublisherController@reviewerList')->name('/publisher/reviewers/list');
+    // Route::get('/publisher/reviewers/list', 'PublisherController@reviewerList')->name('/publisher/reviewers/list');
     Route::get('/publisher/reviewers/{id?}', 'PublisherController@reviewerShow');
     Route::match(['post', 'put'], '/publisher/reviewers/{id?}', 'PublisherController@reviewerSave');    
     Route::get('/publisher/reviewers/{id}/delete', 'PublisherController@reviewerDelete');
@@ -35,6 +35,15 @@ Route::middleware(['checkifpublisher'])->group(function () {
     Route::match(['post', 'put'], '/publisher/reviewers/{reviewerId}/questionnaire-group/{id?}', 'PublisherController@questionnaireGroupSave' );
     Route::match(['delete'], '/publisher/reviewers/{reviewerId}/questionnaire-group/{id}', 'PublisherController@questionnaireGroupDelete' );
     
+    Route::livewire('/publisher/reviewer-list', 'publisher-reviewer-list');
+    Route::view('/publisher/reviewer-list', 'publisher.reviewer-list');
+    Route::livewire('/publisher/statement', 'publisher-statement');
+
+    Route::view('/publisher/settings', 'publisher.settings');
+
+    
+    
+
 });
 
 Route::middleware(['auth'])->group(function(){
