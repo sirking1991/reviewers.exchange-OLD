@@ -45,6 +45,6 @@ class Reviewer extends Model
 
     public function sellingPrice()
     {
-        return $this->price + $this->paymentGatewayFee + $this->serviceFee + $this->otherFees;
+        return round($this->price + $this->paymentGatewayFee + $this->serviceFee + $this->otherFees,2);
     }
 }
