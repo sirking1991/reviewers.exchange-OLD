@@ -15,7 +15,7 @@ class PublisherBestSeller extends Component
             from reviewer_purchases rp, reviewers r
             where r.id=rp.reviewer_id
             and r.user_id=" . Auth()->user()->id ."
-            group by r.name
+            group by r.id
             order by count(rp.id) desc
             limit 10     
         ";
