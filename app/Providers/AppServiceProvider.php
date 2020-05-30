@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         // if we're not in localhost, force use of https
-        if (false === strpos(url()->full(), 'localhost')) {
+        if (false === strpos(url()->full(), 'localhost') && false === strpos(url()->full(), '127.0.0.1') ) {
             URL::forceScheme('https');
         }
     }
