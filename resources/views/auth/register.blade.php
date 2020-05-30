@@ -12,6 +12,23 @@
                         @csrf
 
                         <div class="form-group row">
+                            <label for="type" class="col-md-4 col-form-label text-md-right">{{ __('Register as') }}</label>
+
+                            <div class="col-md-6">
+                                <select class='form-control' name="type" value="{{ old('type') }}">
+                                    <option value="reviewer">Reviewer</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="author">Author</option>
+                                </select>
+                                @error('type')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
                             <label for="first_name" class="col-md-4 col-form-label text-md-right">{{ __('First name') }}</label>
 
                             <div class="col-md-6">
