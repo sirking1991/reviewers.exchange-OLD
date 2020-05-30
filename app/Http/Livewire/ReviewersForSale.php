@@ -20,6 +20,7 @@ class ReviewersForSale extends Component
                 return $query->where('category', 'like', "%$this->category%");
             })
             ->whereRaw("id NOT IN (SELECT reviewer_id FROM reviewer_purchases WHERE user_id=" . Auth()->user()->id . " AND status='success')")
+            ->with('publisher')
             ->get();
 
         return <<<'blade'
@@ -58,19 +59,21 @@ class ReviewersForSale extends Component
                     <div class="card-body horizontal-scroll">
                     @if(0 < count($reviewers))
                         @foreach($reviewers as $index => $r)
-                        <div class="card shadow-sm  rounded-lg">
-                            <img src="{{ env('AWS_S3_URL') . $r->cover_photo }}" class="card-img-top" alt="...">
-                            <div class="card-body wrapword">
-                                <p class='name'>{{ $r->name }}</p>
-                                <p class='selling-price'>                                    
-                                    @if(0>=$r->sellingPrice())
-                                        <button class='btn btn-danger btn-block' onclick="buyNow({{ $r->id }})">Get this for free!</button>
-                                    @else
-                                        <button class='btn btn-danger btn-block' onclick="buyNow({{ $r->id }})">Buy Now {{ number_format($r->sellingPrice(), 2) }}</button>
-                                    @endif
-                                </p> 
-                            </div>
-                        </div>
+                            @if(0==$r->sellingPrice() || 100<=$r->sellingPrice())
+                                <div class="card shadow-sm  rounded-lg">
+                                    <img src="{{ env('AWS_S3_URL') . $r->cover_photo }}" class="card-img-top" alt="...">
+                                    <div class="card-body wrapword">
+                                        <p class='name'>{{ $r->name }}</p>
+                                        <p class='selling-price'>                                    
+                                            @if(0>=$r->sellingPrice())
+                                                <button class='btn btn-danger btn-block' onclick="buyNow( {{ $r->id }}, {{ $r->sellingPrice() }} )">Get this for free!</button>
+                                            @else
+                                                <button class='btn btn-danger btn-block' onclick="buyNow( {{ $r->id }}, {{ $r->sellingPrice() }} )">Buy Now {{ number_format($r->sellingPrice(), 2) }}</button>
+                                            @endif
+                                        </p> 
+                                    </div>
+                                </div>
+                            @endif
                         @endforeach
                     @else
                         <div class="alert alert-secondary" role="alert">
@@ -133,7 +136,7 @@ class ReviewersForSale extends Component
                             <div class='col-md'>
                                 <div class='form-group'>
                                     <label>CVC</label>
-                                    <input class='form-control' type='number' maxlength='4' name='cvc' placeholder='1234' />
+                                    <input class='form-control' type='number' maxlength='4' name='cvc'/>
                                 </div>
                             </div>
                         </div>
@@ -156,25 +159,25 @@ class ReviewersForSale extends Component
                         <div class='row'>
                             <div class='col-md'>
                                 <div class='form-group'>
+                                    <label>City</label>
+                                    <input class='form-control' type='text' maxlength='50' name='city'/>
+                                </div>
+                            </div>
+                            <div class='col-md'>
+                                <div class='form-group'>
                                     <label>State</label>
                                     <input class='form-control' type='text' maxlength='50' name='state'/>
                                 </div>
-                            </div>
+                            </div>                            
+                        </div>
+
+                        <div class='row'>                            
                             <div class='col-md'>
                                 <div class='form-group'>
                                     <label>Postal code</label>
                                     <input class='form-control' type='text' maxlength='10' name='postal_code'/>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class='row'>
-                            <div class='col-md'>
-                                <div class='form-group'>
-                                    <label>City</label>
-                                    <input class='form-control' type='text' maxlength='50' name='city'/>
-                                </div>
-                            </div>
+                            </div>                            
                             <div class='col-md'>
                                 <div class='form-group'>
                                     <label>Country code</label>
@@ -206,6 +209,12 @@ class ReviewersForSale extends Component
                     </div>      
                     <div class='modal-footer'>
                         <input name='processBtn' type='button' onclick='processPayment()' class="btn btn-success btn-block" value='Process payment' />
+                        
+                        <div style='display: none; margin-left: 50%; margin-right: 50%;' class='spinner'>                        
+                            <div class="spinner-border text-success" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,13 +255,16 @@ class ReviewersForSale extends Component
                         var paymentIntentStatus = paymentIntent.attributes.status;
                 
                         if (paymentIntentStatus === 'succeeded') {
-                          // You already received your customer's payment. You can show a success message from this condition.
-                          location.reload();
+                            // You already received your customer's payment. You can show a success message from this condition.
+                            confirmPayment();
+
                         } else if(paymentIntentStatus === 'awaiting_payment_method') {
+                            // The PaymentIntent encountered a processing error. You can refer to paymentIntent.attributes.last_payment_error to check the error and render the appropriate error message.
                             $('#paymongoCardDetailModal div.alert').hide();
                             $('#paymongoCardDetailModal').modal('show');
                             displayError('An error occured while processing your payment. Try again later');
-                          // The PaymentIntent encountered a processing error. You can refer to paymentIntent.attributes.last_payment_error to check the error and render the appropriate error message.
+
+                          
                         }
                       }).catch(function (e) {
                         $('#paymongoCardDetailModal input[name=processBtn]').show();
@@ -261,17 +273,52 @@ class ReviewersForSale extends Component
                 });  
             });
 
-            function buyNow(r)
+            function populateFields()
+            {
+                // $('#paymongoCardDetailModal input[name=line1]').val( getCookie('line1') );
+                // $('#paymongoCardDetailModal input[name=line2]').val( getCookie('line2') );
+                // $('#paymongoCardDetailModal input[name=city]').val( getCookie('city') );
+                // $('#paymongoCardDetailModal input[name=state]').val( getCookie('state') );
+                // $('#paymongoCardDetailModal input[name=postal_code]').val( getCookie('postal_code') );
+                // $('#paymongoCardDetailModal input[name=country_code]').val( getCookie('country_code') );
+                // $('#paymongoCardDetailModal input[name=name]').val( getCookie('name') );
+                // $('#paymongoCardDetailModal input[name=email]').val( getCookie('email') );
+                // $('#paymongoCardDetailModal input[name=phone]').val( getCookie('phone') );                
+            }
+
+            function saveFieldValues()
+            {
+                // setCookie('line1', $('#paymongoCardDetailModal input[name=line1]'));
+                // setCookie('line2', $('#paymongoCardDetailModal input[name=line2]'));
+                // setCookie('city', $('#paymongoCardDetailModal input[name=city]'));
+                // setCookie('state', $('#paymongoCardDetailModal input[name=state]'));
+                // setCookie('postal_code', $('#paymongoCardDetailModal input[name=postal_code]'));
+                // setCookie('country_code', $('#paymongoCardDetailModal input[name=country_code]'));
+                // setCookie('name', $('#paymongoCardDetailModal input[name=name]'));
+                // setCookie('email', $('#paymongoCardDetailModal input[name=email]'));
+                // setCookie('phone', $('#paymongoCardDetailModal input[name=phone]'));
+            }
+
+            function buyNow(r, price)
             {
                 reviewerId = r;
+
+                if (0==price) {
+                    window.location = '/paymongo/buy-reviewer/' + reviewerId;
+                    return;                        
+                }
+
                 $('#paymongoCardDetailModal div.alert').hide();
                 $('#paymongoCardDetailModal').modal('show');
+                populateFields();
             }
 
             function processPayment()
             {
+                saveFieldValues();
                 $('#paymongoCardDetailModal div.alert').hide();
                 $('#paymongoCardDetailModal input[name=processBtn]').hide();
+                $('#paymongoCardDetailModal div.spinner').show();
 
                 // get clientKey                
                 axios.get('paymongo/buy-reviewer/' + reviewerId)
@@ -280,6 +327,7 @@ class ReviewersForSale extends Component
                         createPaymentMethod();            
                     }).catch(function (e) {
                         $('#paymongoCardDetailModal input[name=processBtn]').show();
+                        $('#paymongoCardDetailModal div.spinner').hide();
                         displayError(e);
                     });
             }
@@ -324,6 +372,7 @@ class ReviewersForSale extends Component
                     attachPaymentMethod();
                   }).catch(function (e) {
                     $('#paymongoCardDetailModal input[name=processBtn]').show();
+                    $('#paymongoCardDetailModal div.spinner').hide();
                     displayError(e);
                   });  
             }
@@ -349,6 +398,7 @@ class ReviewersForSale extends Component
                   ).then(function(response) {
                     
                     $('#paymongoCardDetailModal input[name=processBtn]').show();
+                    $('#paymongoCardDetailModal div.spinner').hide();
                     
                     var paymentIntent = response.data.data;
                     var paymentIntentStatus = paymentIntent.attributes.status;
@@ -363,7 +413,7 @@ class ReviewersForSale extends Component
 
                     } else if (paymentIntentStatus === 'succeeded') {
                       // You already received your customer's payment. You can show a success message from this condition.
-                      location.reload();
+                      confirmPayment();
 
                     } else if(paymentIntentStatus === 'awaiting_payment_method') {
                         // The PaymentIntent encountered a processing error. You can refer to paymentIntent.attributes.last_payment_error to check the error and render the appropriate error message.// The PaymentIntent encountered a processing error. 
@@ -373,21 +423,34 @@ class ReviewersForSale extends Component
 
                   }).catch(function (e) {
                     $('#paymongoCardDetailModal input[name=processBtn]').show();
+                    $('#paymongoCardDetailModal div.spinner').hide();
                     displayError(e);
                   });
             }
 
+            function confirmPayment()
+            {
+                axios.get('/paymongo/confirm-payment/' + clientKey)
+                .then(function(resp){
+                    location.reload();
+                }).catch(function(e){
+                    location.reload();
+                });
+            }
+
             function displayError(e)
             {
-                console.log(e);
                 var msg = e;
-                if(undefined!=e.response.data.errors) {
-                    msg = '<ul>';
-                    for(var x=0; x<e.response.data.errors.length; x++){
-                        msg += `<li>${e.response.data.errors[x].detail}</li>`
-                    }
-                    msg += '</ul>';
-                }                
+                if ('string' != typeof e) {
+                    if (undefined != e.response.data.errors) {
+                        msg = '<ul>';
+                        for(var x=0; x<e.response.data.errors.length; x++){
+                            msg += `<li>${e.response.data.errors[x].detail}</li>`
+                        }
+                        msg += '</ul>';
+                    }   
+                }
+             
                 $('#paymongoCardDetailModal div.alert').show();
                 $('#paymongoCardDetailModal div.alert').html(msg);
             }

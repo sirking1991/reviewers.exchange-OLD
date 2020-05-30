@@ -56,7 +56,7 @@ Route::middleware(['auth'])->group(function(){
 Route::middleware([])->group(function(){
     Route::get('/paymongo/buy-reviewer/{reviewerId}', 'PaymongoController@buyReviewer');
     Route::post('/paymongo/webhook', 'PaymongoController@webhook');
-//    Route::get('/paymaya/redirectUrl/{status}/{reference}', 'PaymayaController@redirect');
+    Route::get('/paymongo/confirm-payment/{clientKey}', 'PaymongoController@confirmPayment');
 });
 
 

@@ -16,7 +16,7 @@ class Reviewer extends Model
 
         static::retrieved(function($model){
             if (0 < $model->price) {
-                $gateway = env('PAYMENT_GATEWAY', 'paymongo');
+                $gateway = env('PAYMENT_GATEWAY', 'PAYMONGO');
                 $model->paymentGatewayFee = env($gateway . '_ADDON_AMOUNT') + (env($gateway . '_ADDON_RATE') * $model->price);
                 $model->serviceFee = env('SERVICE_FEE_RATE') * $model->price;
                 $model->otherFees = 0;
@@ -25,7 +25,7 @@ class Reviewer extends Model
     }
 
     public function publisher(){
-        return $this->belongsTo('\App\User', 'user_id', 'id');
+        return $this->belongsTo('\App\User', 'user_id');
     }
 
     public function questionnaires()

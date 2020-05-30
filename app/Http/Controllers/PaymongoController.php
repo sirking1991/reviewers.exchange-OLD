@@ -53,7 +53,7 @@ class PaymongoController extends Controller
             'other_fees' => $reviewer->otherFees,
             'total' =>  $reviewer->sellingPrice(),
             'status' => 0==$reviewer->price ? 'success' : 'pending',
-            'raw_request_data' => json_encode($paymentIntent),
+            'raw_request_data' => $clientKey != 'free' ? json_encode($paymentIntent) : '',
             'raw_response_data' => '',
         ]);
 
@@ -63,9 +63,39 @@ class PaymongoController extends Controller
             return response()->json($clientKey);
     }
 
-    public function webhook(Request $request)
+    /**
+     * Confirm with paymaya if the passed clientKey have been processed successfully
+     */
+    public function confirmPayment($clientKey)
     {
-        Log::info('Paymongo webhook', ['request'=>$request->all()]);
+        Log::info('Paymongo confirmPayment', ['clientKey'=>$clientKey]);
+
+        $rp = \App\ReviewerPurchase::where('gateway_trans_id', $clientKey)->first();
+
+        if (!$rp) return response('', 404);
+
+        $pi = explode('_client_', $clientKey);
+
+        $paymentIntent = Paymongo::paymentIntent()->find($pi[0]);
+
+        if('succeeded'==$paymentIntent->getStatus()) {
+            $rp->status = 'success';
+            $rp->save();
+
+            $r = \App\Reviewer::find($rp->reviewer_id);
+
+            $publisher = \App\User::find($r->user_id);
+
+            // add transaction record for author
+            \App\Transaction::create([
+                'reviewer_purchase_id' => $rp->id,
+                'user_id' => $publisher->id,
+                'description' => $r->name,
+                'add' => $rp->amount,
+            ]);
+        }
+
+        return response($rp->reviewer());
     }
 
 }

@@ -17,7 +17,7 @@ class ReviewerPurchase extends Model
 
     public function reviewer()
     {
-        return $this->belongsTo('App\Reviewer', 'reviewer_id', 'id');
+        return $this->belongsTo('App\Reviewer');
     }
 
 }
