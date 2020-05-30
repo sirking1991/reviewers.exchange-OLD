@@ -37,9 +37,10 @@ Route::middleware(['checkifpublisher'])->group(function () {
     
     Route::livewire('/publisher/reviewer-list', 'publisher-reviewer-list');
     Route::view('/publisher/reviewer-list', 'publisher.reviewer-list');
-    Route::livewire('/publisher/statement', 'publisher-statement');
+    // Route::livewire('/publisher/statement', 'publisher-statement');
 
     Route::view('/publisher/settings', 'publisher.settings');
+    Route::view('/publisher/statement', 'publisher.statement');
 
     
     
