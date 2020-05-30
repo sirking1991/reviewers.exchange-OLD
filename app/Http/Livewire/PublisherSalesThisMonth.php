@@ -11,11 +11,18 @@ class PublisherSalesThisMonth extends Component
 
     public function render()
     {
-        $this->salesThisMonth = DB::table('reviewer_purchases')
-                    ->where('status', 'success')
+
+        $add = DB::table('transactions')
+                    ->whereIn('type', ['sales','sales-refund'])
                     ->whereMonth('created_at', date('n'))
-                    ->whereRaw("reviewer_id IN (SELECT id FROM reviewers WHERE user_id=" . Auth()->user()->id . ")")
-                    ->sum('amount');
+                    ->where('user_id', Auth()->user()->id)
+                    ->sum('add');
+        $sub = DB::table('transactions')
+                    ->whereIn('type', ['sales','sales-refund'])
+                    ->whereMonth('created_at', date('n'))
+                    ->where('user_id', Auth()->user()->id)
+                    ->sum('sub');
+        $this->salesThisMonth = $add - $sub;
 
         return <<<'blade'
             <div class="card shadow-sm rounded-lg">

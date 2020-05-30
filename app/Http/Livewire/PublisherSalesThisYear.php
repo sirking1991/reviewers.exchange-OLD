@@ -10,11 +10,17 @@ class PublisherSalesThisYear extends Component
     public $salesThisYear = 0;
     public function render()
     {
-        $this->salesThisYear = DB::table('reviewer_purchases')
-                    ->where('status', 'success')
+         $add = DB::table('transactions')
+                    ->whereIn('type', ['sales','sales-refund'])
                     ->whereYear('created_at', date('Y'))
-                    ->whereRaw("reviewer_id IN (SELECT id FROM reviewers WHERE user_id=" . Auth()->user()->id . ")")
-                    ->sum('amount');
+                    ->where('user_id', Auth()->user()->id)
+                    ->sum('add');
+        $sub = DB::table('transactions')
+                    ->whereIn('type', ['sales','sales-refund'])
+                    ->whereYear('created_at', date('Y'))
+                    ->where('user_id', Auth()->user()->id)
+                    ->sum('sub');
+        $this->salesThisYear = $add - $sub;                    
 
         return <<<'blade'
         <div class="card shadow-sm rounded-lg">
