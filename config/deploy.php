@@ -61,7 +61,6 @@ return [
             'artisan:view:clear',
             'artisan:cache:clear',
             'artisan:config:cache',
-            'artisan:route:cache',
             'artisan:migrate',
         ],
         

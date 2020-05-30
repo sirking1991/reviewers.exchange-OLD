@@ -63,7 +63,7 @@ class ReviewersForSale extends Component
                                 <div class="card shadow-sm  rounded-lg">
                                     <img src="{{ env('AWS_S3_URL') . $r->cover_photo }}" class="card-img-top" alt="...">
                                     <div class="card-body wrapword">
-                                        <p class='name'>{{ $r->name }}</p>
+                                        <p class='name'>{{ $r->name }} by <span class='text-muted'>{{ $r->publisher->display_name }}</span></p>
                                         <p class='selling-price'>                                    
                                             @if(0>=$r->sellingPrice())
                                                 <button class='btn btn-danger btn-block' onclick="buyNow( {{ $r->id }}, {{ $r->sellingPrice() }} )">Get this for free!</button>
@@ -141,7 +141,7 @@ class ReviewersForSale extends Component
                             </div>
                         </div>
 
-                        <div class='row'>
+                        <div class='row' style='display:none;'>
                             <div class='col-md'>
                                 <div class='form-group'>
                                     <label>Address line 1</label>
@@ -156,7 +156,7 @@ class ReviewersForSale extends Component
                             </div>
                         </div>
 
-                        <div class='row'>
+                        <div class='row' style='display:none;'>
                             <div class='col-md'>
                                 <div class='form-group'>
                                     <label>City</label>
@@ -171,7 +171,7 @@ class ReviewersForSale extends Component
                             </div>                            
                         </div>
 
-                        <div class='row'>                            
+                        <div class='row' style='display:none;'>                            
                             <div class='col-md'>
                                 <div class='form-group'>
                                     <label>Postal code</label>
