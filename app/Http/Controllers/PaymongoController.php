@@ -23,8 +23,8 @@ class PaymongoController extends Controller
 
         $clientKey = 'free';
 
-        if(0<$reviewer->price) {            
-            $paymentIntent = Paymongo::paymentIntent()->create([
+        if(0<$reviewer->price) { 
+            $params = [
                 'amount' => $reviewer->sellingPrice(),
                 'payment_method_allowed' => [
                     'card'
@@ -37,8 +37,11 @@ class PaymongoController extends Controller
                 'description' => $reviewer->name,
                 'statement_descriptor' => env('APP_NAME'),
                 'currency' => "PHP",
-            ]);   
+            ];
+            Log::info('paymongo paymentIntent->create params', ['params'=>$params, 'source'=>__METHOD__]);
+            $paymentIntent = Paymongo::paymentIntent()->create($params);   
             $clientKey = $paymentIntent->getClientKey();      
+            Log::info('payment paymentIntent->create result', ['result'=>$clientKey, 'source'=>__METHOD__]);
         }
 
         // create new order
@@ -68,8 +71,6 @@ class PaymongoController extends Controller
      */
     public function confirmPayment($clientKey)
     {
-        Log::info('Paymongo confirmPayment', ['clientKey'=>$clientKey]);
-
         $rp = \App\ReviewerPurchase::where('gateway_trans_id', $clientKey)->first();
 
         if (!$rp) return response('', 404);
@@ -79,7 +80,9 @@ class PaymongoController extends Controller
         $paymentIntent = Paymongo::paymentIntent()->find($pi[0]);
 
         if('succeeded'==$paymentIntent->getStatus()) {
+            Log::info('paymongo confirmPayment', ['clientKey'=>$clientKey, 'source'=>__METHOD__]);
             $rp->status = 'success';
+            $rp->raw_response_data = json_encode($paymentIntent);
             $rp->save();
 
             $r = \App\Reviewer::find($rp->reviewer_id);
@@ -90,12 +93,13 @@ class PaymongoController extends Controller
             \App\Transaction::create([
                 'reviewer_purchase_id' => $rp->id,
                 'user_id' => $publisher->id,
+                'type' => 'sales',
                 'description' => $r->name,
                 'add' => $rp->amount,
             ]);
         }
 
-        return response($rp->reviewer());
+        return response();
     }
 
 }
