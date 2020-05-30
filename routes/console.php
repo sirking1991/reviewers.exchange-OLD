@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Artisan;
+use Luigel\Paymongo\Facades\Paymongo;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,52 +34,27 @@ Artisan::command('paymaya:webhooks-list', function(){
     }
 });
 
-use Luigel\Paymongo\Facades\Paymongo;
-Artisan::command('paymongo:test-payment', function(){
-    
-    // $paymentMethod = Paymongo::paymentMethod()->create([
-    //     'type' => 'card',
-    //     'details' => [
-    //         'card_number' => '4343434343434345',
-    //         'exp_month' => 12,
-    //         'exp_year' => 25,
-    //         'cvc' => "123",
-    //     ],
-    //     'billing' => [
-    //         'address' => [
-    //             'line1' => 'Somewhere there',
-    //             'city' => 'Pasay City',
-    //             'state' => 'NCR',
-    //             'country' => 'PH',
-    //             'postal_code' => '1300',
-    //         ],
-    //         'name' => 'Sherwin de Jesus',
-    //         'email' => 'sirking1991@gmail.com',
-    //         'phone' => '09204759976'
-    //     ],
-    // ]);    
-
-    // dump($paymentMethod);
-
-    $paymentIntent = Paymongo::paymentIntent()->create([
-        'amount' => 100,
-        'payment_method_allowed' => [
-            'card'
-        ],
-        'payment_method_options' => [
-            'card' => [
-                'request_three_d_secure' => 'automatic'
-            ]
-        ],
-        'description' => 'This is a test payment intent',
-        'statement_descriptor' => 'LUIGEL STORE',
-        'currency' => "PHP",
+Artisan::command('paymongo:webhook-set', function(){
+    $url = $this->ask('Base URL');
+    $webhook = Paymongo::webhook()->create([
+        'url' => $url . '/paymongo/webhook',
+        'events' => ['source.chargeable']
     ]);
+    dump($webhook);
+});
 
-    dump($paymentIntent);
+Artisan::command('paymongo:webhook-enable', function(){
+    $webhooks = Paymongo::webhook()->all();
+    foreach ($webhooks as $wh) $wh->enable();
+    dump(Paymongo::webhook()->all());
+});
 
-    // // Attached the payment method to the payment intent
-    // $successfulPayment = $paymentIntent->attach($paymentMethod->{'id'});
+Artisan::command('paymongo:webhook-disable', function(){
+    $webhooks = Paymongo::webhook()->all();
+    foreach ($webhooks as $wh) $wh->disable();
+    dump(Paymongo::webhook()->all());
+});
 
-    // dump($successfulPayment);
+Artisan::command('paymongo:webhook-list', function(){
+    dump(Paymongo::webhook()->all());
 });

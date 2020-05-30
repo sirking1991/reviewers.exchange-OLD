@@ -51,13 +51,12 @@ Route::middleware(['auth'])->group(function(){
     Route::get('/generateExam/{reviewerId}', 'ReviewerController@generateExam');
     Route::post('/saveExamResult', 'ReviewerController@saveExamResult');
     Route::get('/userExamSummary/{reviewerId}', 'ReviewerController@userExamSummary');
-    Route::get('/buyReviewer/{reviewerId}', 'ReviewerController@buyReviewer');
-
 });
+
 Route::middleware([])->group(function(){
-    Route::get('/paymaya/checkout', 'PaymayaController@checkout')->name('paymaya-checkout');
-    Route::post('/paymaya/callback/{status}', 'PaymayaController@callback');
-    Route::get('/paymaya/redirectUrl/{status}/{reference}', 'PaymayaController@redirect');
+    Route::get('/paymongo/buy-reviewer/{reviewerId}', 'PaymongoController@buyReviewer');
+    Route::post('/paymongo/webhook', 'PaymongoController@webhook');
+//    Route::get('/paymaya/redirectUrl/{status}/{reference}', 'PaymayaController@redirect');
 });
 
 

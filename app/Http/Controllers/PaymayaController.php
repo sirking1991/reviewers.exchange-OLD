@@ -84,7 +84,7 @@ class PaymayaController extends Controller
             return redirect()->back()->withErrors(['message' => $error['message']]);
         }
 
-        // find the gatewate_trans_id and update
+        // find the gateway_trans_id and update
         $reviewerPurchase = \App\ReviewerPurchase::where('gateway_trans_id', $itemCheckout->id)->first();
         if(!$reviewerPurchase) {
             Log::error('paymaya callback: unrecognized gateway transaction id', ['id', $itemCheckout->id, 'raw_data'=>json_encode($checkout)]);
@@ -94,8 +94,16 @@ class PaymayaController extends Controller
         $reviewerPurchase->status = $status;
         $reviewerPurchase->raw_response_data = json_encode($checkout);
         $reviewerPurchase->save();
+
+        // add publisher transaction
+        // \App\Transaction::create([
+        //     'reviewer_purchase_id' => $reviewerPurchase->id,
+        //     'user_id' => $reviewerPurchase->reviewer()->user_id,
+        //     'description' => 'Someone bought ' . $reviewerPurchase->reviewer()->name,
+        //     'add' => $reviewerPurchase->amount
+        // ]);        
     
-        return $checkout;
+        return $reviewerPurchase->reviewer();
     }      
 
     public function customizeMerchantPage()
