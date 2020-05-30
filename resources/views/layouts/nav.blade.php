@@ -2,7 +2,7 @@
     <div class="container">
         <a class="navbar-brand" href="{{ url('/home') }}">
             <img src="{{ env('AWS_S3_URL') }}common/logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
-            {{ config('app.name', 'Laravel') }}
+            @include('layouts.appname')
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
             <span class="navbar-toggler-icon"></span>
