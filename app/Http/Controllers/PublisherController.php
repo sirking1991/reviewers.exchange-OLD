@@ -9,6 +9,7 @@ use App\Answer;
 use App\QuestionnaireGroup;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class PublisherController extends Controller
 {
@@ -345,6 +346,37 @@ class PublisherController extends Controller
             ->update(['questionnaire_group_id' => 0]);
 
         return QuestionnaireGroup::where('reviewer_id', $reviewerId)->get();
-    }    
+    }  
+    
+    public function requestFundWithdrawal(Request $request)
+    {
+        // check if has enough balance
+        $add = DB::table('transactions')->where('user_id', Auth()->user()->id)->sum('add');
+        $sub = DB::table('transactions')->where('user_id', Auth()->user()->id)->sum('sub');
+        $balance = $add - $sub;
+        $requestAmount = (int)$request->amount;
+
+        if ($requestAmount > $balance) {
+            return response('Requested amount is greater than current balance', 400);
+        }
+
+        if ($requestAmount < env('MINIMUM_BALANCE_FOR_WITHDRAWAL', 500)) {
+            return response('Requested amount is less than the minimum balance for withdrawal', 400);
+        }
+
+        // delete existing pending request
+        \App\WithdrawalRequest::where('user_id', Auth()->user()->id)
+                    ->where('status', 'pending')
+                    ->delete();
+
+        // create request
+        \App\WithdrawalRequest::create([
+            'user_id' => Auth()->user()->id,
+            'amount' => $requestAmount,
+            'status' => 'pending'
+        ]);
+
+        return response('success');
+    }
 
 }

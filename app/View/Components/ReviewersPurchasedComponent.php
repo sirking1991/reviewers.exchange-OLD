@@ -37,7 +37,7 @@ class ReviewersPurchasedComponent extends Component
                             @foreach($reviewersPurchased as $index => $rp)
                                 <div class="card shadow-sm rounded-lg" onclick="openPurchasedReviewerDialog({{ $index }})">
                                     <img src="{{ env('AWS_S3_URL') . $rp->reviewer->cover_photo }}" class="card-img-top" alt="...">
-                                    <div class="card-body wrapword">{{ $rp->reviewer->name }} by <span class='text-muted'>{{ $rp->reviewer->publisher->display_name }}</span></div>
+                                    <div class="card-body wrapword">{{ $rp->reviewer->name }} - <span class='text-muted'>{{ $rp->reviewer->publisher->display_name }}</span></div>
                                 </div>
                             @endforeach
                         </div>

@@ -37,7 +37,8 @@ Route::middleware(['checkifpublisher'])->group(function () {
     
     Route::livewire('/publisher/reviewer-list', 'publisher-reviewer-list');
     Route::view('/publisher/reviewer-list', 'publisher.reviewer-list');
-    // Route::livewire('/publisher/statement', 'publisher-statement');
+    
+    Route::post('/publisher/request-fund-withdrawal', 'PublisherController@requestFundWithdrawal');
 
     Route::view('/publisher/settings', 'publisher.settings');
     Route::view('/publisher/statement', 'publisher.statement');

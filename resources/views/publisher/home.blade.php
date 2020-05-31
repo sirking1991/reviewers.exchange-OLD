@@ -14,10 +14,16 @@
                         </div>
                     @endif
 
-                    <div class="card-deck">
-                        @livewire('publisher-sales-this-month')
-                        @livewire('publisher-sales-this-year')
-                        @livewire('publisher-account-balance')
+                    <div class="row">
+                        <div class='col-md-4'>
+                            @livewire('publisher-sales-this-month')
+                        </div>
+                        <div class='col-md-4'>
+                            @livewire('publisher-sales-this-year')
+                        </div>
+                        <div class='col-md-4'>
+                            @livewire('publisher-account-balance')
+                        </div>
                     </div>
 
                     @livewire('publisher-best-seller')    
