@@ -5,8 +5,17 @@
 // Variables
 @import 'variables';
 
-// Bootstrap
+// Bootstraps
 @import '~bootstrap/scss/bootstrap';
+
+// body {
+//     background-color: #f8fafc;
+//     background-image: url('https://lares-reviewers.s3-ap-southeast-1.amazonaws.com/common/reviewers_bg/bg_1.jpg');
+//     background-repeat: no-repeat;
+//     background-size: cover;
+//     background-clip: content-box;
+//     background-color: rgba(255,255,255,0.2);
+// }
 
 .clickable{
     cursor: pointer;
