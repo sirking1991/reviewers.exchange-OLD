@@ -15,10 +15,10 @@
                             <label for="type" class="col-md-4 col-form-label text-md-right">{{ __('Register as') }}</label>
 
                             <div class="col-md-6">
-                                <select class='form-control' name="type" value="{{ old('type') }}">
+                                <select class='form-control' id="type"  name="type">
                                     <option value="reviewer">Reviewer</option>
                                     <option value="teacher">Teacher</option>
-                                    <option value="author">Author</option>
+                                    <option value="publisher">Author/Publisher</option>
                                 </select>
                                 @error('type')
                                     <span class="invalid-feedback" role="alert">
