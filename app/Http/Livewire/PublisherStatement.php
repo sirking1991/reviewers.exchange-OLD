@@ -11,26 +11,48 @@ class PublisherStatement extends Component
     public $rows;
     public $dateFrom;
     public $dateTo;
+    public $add;
+    public $sub;
     public $runningBalance = 0;
 
     public function mount()
     {
-        $this->dateFrom = date('Y-03-01');
+        $this->dateFrom = date('Y-m-01');
         $this->dateTo = date('Y-m-d');
+    }
+
+    private function defaultQuery()
+    {
+        $this->add = DB::table('transactions')->where('user_id', Auth()->user()->id)->whereDate('created_at', '<', date('Y-m-01'))->sum('add');
+        $this->sub = DB::table('transactions')->where('user_id', Auth()->user()->id)->whereDate('created_at', '<', date('Y-m-01'))->sum('sub');             
+
+        $this->rows = \App\Transaction::where('user_id', Auth()->user()->id)
+            ->whereDate('created_at', '>=', date('Y-m-01'))
+            ->whereDate('created_at', '<=', date('Y-m-d'))
+            ->orderBy('created_at')
+            ->get();
     }
 
     public function render()
     {
-        $add = DB::table('transactions')->where('user_id', Auth()->user()->id)->whereDate('created_at', '<', $this->dateFrom)->sum('add');
-        $sub = DB::table('transactions')->where('user_id', Auth()->user()->id)->whereDate('created_at', '<', $this->dateFrom)->sum('sub');
+        if( !strtotime($this->dateFrom) || !strtotime($this->dateTo)) {
+            $this->defaultQuery();
+        } else {
+            try {
+                $this->rows = \App\Transaction::where('user_id', Auth()->user()->id)
+                        ->whereDate('created_at', '>=', $this->dateFrom)
+                        ->whereDate('created_at', '<=', $this->dateTo)
+                        ->orderBy('created_at')
+                        ->get();                    
+                $this->add = DB::table('transactions')->where('user_id', Auth()->user()->id)->whereDate('created_at', '<', $this->dateFrom)->sum('add');
+                $this->sub = DB::table('transactions')->where('user_id', Auth()->user()->id)->whereDate('created_at', '<', $this->dateFrom)->sum('sub');
 
-        $this->runningBalance = $add - $sub;
+            } catch (\Throwable $th) {
+                $this->defaultQuery();
+            }           
+        }
 
-        $this->rows = \App\Transaction::where('user_id', Auth()->user()->id)
-                    ->whereDate('created_at', '>=', $this->dateFrom)
-                    ->whereDate('created_at', '<=', $this->dateTo)
-                    ->orderBy('created_at')
-                    ->get();                    
+        $this->runningBalance = $this->add - $this->sub;
 
         return <<<'blade'
             <div class='card'>
@@ -46,7 +68,7 @@ class PublisherStatement extends Component
                 </div>
                 </div>
                 <div class='card-body'>
-                    <table class="table">
+                    <table class="table table-striped">
                         <thead class='thead-light'>
                             <tr>
                                 <th scope="col">Date/Time</th>
