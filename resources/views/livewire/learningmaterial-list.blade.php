@@ -50,15 +50,12 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <script type="text/javascript">
-    var lists  = {!! $lists !!};
+    var learningMateriallists  = {!! $lists !!};
     var selectedLearningMaterialIndex;
     var selectedLearningMaterial;  
 
     document.addEventListener("DOMContentLoaded", function() 
     {
-        $('#learningMaterialModal').on('show.bs.modal', '.modal', function () {
-            $(this).appendTo('body');
-        });
         contentEditor = tinymce.init({
             selector: '#content',
             plugins: 'casechange linkchecker autolink lists checklist media mediaembed pageembed powerpaste table advtable tinymcespellchecker',
@@ -67,8 +64,7 @@
             forced_root_block : '',
             force_br_newlines : true,
             force_p_newlines : false,
-            height: 600,
-            images_upload_url: '/',
+            height: 600,           
             setup: editor => {
                 // Apply the focus effect
                 editor.on("init", () => {
@@ -103,10 +99,10 @@
     function loadLearningMaterials()
     {        
         var html = '';
-        for (let i = 0; i < lists.length; i++) {
+        for (let i = 0; i < learningMateriallists.length; i++) {
             html = html +  `
                 <button onclick="openLearningMaterialDetail(` + i + `)" type="button" class="list-group-item list-group-item-action">
-                    ` + lists[i].title + `
+                    ` + learningMateriallists[i].title + `
                 </button>
             `;                
         };
@@ -125,7 +121,7 @@
         $('#learningMaterialModal textarea[name=content]').val('')
         tinymce.get('content').setContent('');
         
-        selectedLearningMaterial = lists[id];
+        selectedLearningMaterial = learningMateriallists[id];
         if(undefined!=selectedLearningMaterial) {
             $('#learningMaterialModal input[name=title]').val(selectedLearningMaterial.title);
             $('#learningMaterialModal textarea[name=content]').val(selectedLearningMaterial.content);
@@ -156,7 +152,7 @@
             data: formData,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            lists = data;
+            learningMateriallists = data;
 
             $('#saveLearningMaterialBtn').html("Save");
             $('#saveLearningMaterialBtn').removeClass('disabled');            
@@ -176,20 +172,21 @@
     // Delete selectedQuestion
     function deleteSelectedLearningMaterial()
     {
-        if(!confirm('Are you sure you want to delete this question?')) return;
+        if(!confirm('Are you sure you want to delete this learning material?')) return;
 
-        $('#deleteQuestionBtn').html("Deleting...");
-        $('#deleteQuestionBtn').addClass('disabled');
+        $('#deleteLearningMaterialBtn').html("Deleting...");
+        $('#deleteLearningMaterialBtn').addClass('disabled');
+
         $.ajax({
-            url: '/publisher/reviewers/{{ $reviewerId }}/question/' + selectedQuestion.id,
+            url: '/publisher/reviewers/{{ $reviewerId }}/learning-material/' + selectedLearningMaterial.id,
             method: 'DELETE',
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            questionnaires = data;
-            loadQuestionnaires();
-            $('#deleteQuestionBtn').html("Delete");
-            $('#deleteQuestionBtn').removeClass('disabled');            
-            $('#questionModal').modal('hide');
+            learningMateriallists = data;
+            loadLearningMaterials();
+            $('#deleteLearningMaterialBtn').html("Delete");
+            $('#deleteLearningMaterialBtn').removeClass('disabled');            
+            $('#learningMaterialModal').modal('hide');
         });                
     }    
 </script>

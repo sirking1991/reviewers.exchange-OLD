@@ -120,7 +120,7 @@ class PublisherController extends Controller
                 'content' => $request->content ?? '',
             ]);
         } else {
-            Log::debug('updating question record');
+            Log::debug('updating learning-material record');
             $learningMaterial = LearningMaterial::where('reviewer_id', $reviewerId)->where('id', $id)->first();
 
             if(!$learningMaterial) return response('Learning material not found', 404);
@@ -134,6 +134,23 @@ class PublisherController extends Controller
         return LearningMaterial::where('reviewer_id', $reviewerId)->get();
     }
 
+    public function deleteLearningMaterial(String $reviewerId, String $questionId)
+    {
+        Log::debug('deleting Learning Material ' . $questionId);
+
+        $question = LearningMaterial::where('user_id', Auth()->user()->id)
+            ->where('reviewer_id', $reviewerId)
+            ->where('id', $questionId)
+            ->first();
+
+        if (!$question) return response('', 404);
+
+        Answer::where('questionnaire_id', $questionId)->delete();
+        $question->delete();
+
+        return LearningMaterial::where('reviewer_id', $reviewerId)->get();
+    }
+
     public function saveQuestion(Request $request, String $reviewerId, String $questionId)
     {
         if (0 == $questionId) {
@@ -142,6 +159,7 @@ class PublisherController extends Controller
                 'user_id' => Auth()->user()->id,
                 'reviewer_id' => $reviewerId,
                 'questionnaire_group_id' => $request->input('questionnaire_group_id') ?? '0',
+                'learning_material_id' => $request->input('learning_material_id') ?? '0',
                 'question' => $request->input('question') ?? '',
                 'image' => '',
                 'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
@@ -181,6 +199,7 @@ class PublisherController extends Controller
 
             $question->update([
                 'questionnaire_group_id' => $request->input('questionnaire_group_id') ?? '0',
+                'learning_material_id' => $request->input('learning_material_id') ?? '0',
                 'question' => $request->input('question') ?? '',
                 'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
                 'difficulty_level' => $request->input('difficulty_level') ?? 'normal',
@@ -298,6 +317,7 @@ class PublisherController extends Controller
         Log::debug('deleting question ' . $questionId);
 
         $question = Questionnaire::where('user_id', Auth()->user()->id)
+            ->where('reviewer_id', $reviewerId)
             ->where('id', $questionId)
             ->first();
 
