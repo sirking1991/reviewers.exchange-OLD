@@ -16,7 +16,6 @@ class QuestionnaireList extends Component
         $this->reviewerId = $reviewerId;
 
         $this->questionnaires = \App\Questionnaire::where('reviewer_id', $this->reviewerId)
-            ->where('user_id', Auth()->user()->id)
             ->with('answers')
             ->get();
 

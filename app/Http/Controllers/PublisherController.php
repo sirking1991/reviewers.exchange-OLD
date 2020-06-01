@@ -108,7 +108,6 @@ class PublisherController extends Controller
         return response()->json();
     }
 
-
     public function saveQuestion(Request $request, String $reviewerId, String $questionId)
     {
         if (0 == $questionId) {
@@ -245,8 +244,7 @@ class PublisherController extends Controller
             }
         }
 
-        return Questionnaire::where('user_id', Auth()->user()->id)
-            ->where('reviewer_id', $reviewerId)
+        return Questionnaire::where('reviewer_id', $reviewerId)
             ->with('answers')
             ->get();
     }
@@ -282,8 +280,7 @@ class PublisherController extends Controller
         Answer::where('questionnaire_id', $questionId)->delete();
         $question->delete();
 
-        return Questionnaire::where('user_id', Auth()->user()->id)
-            ->where('reviewer_id', $reviewerId)
+        return Questionnaire::where('reviewer_id', $reviewerId)
             ->with('answers')
             ->get();
     }
