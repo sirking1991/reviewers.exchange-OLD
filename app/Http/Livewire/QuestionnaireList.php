@@ -27,8 +27,8 @@ class QuestionnaireList extends Component
         return view('livewire.questionnaire-list');
     }
 
-    public function openQuestionDetail($id)
-    {
-        return view('livewire.questionnaire-detail');
-    }
+    // public function openQuestionDetail($id)
+    // {
+    //     return view('livewire.questionnaire-detail');
+    // }
 }

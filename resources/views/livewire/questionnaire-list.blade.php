@@ -1,15 +1,14 @@
-<div>
-    <div class="card shadow-sm bg-white rounded">
-        <div class="card-header">
-            Questionnaires ({{ count($questionnaires) }} questions)
-            <div class="float-right">
-                <input onclick="openQuestionnaireGroupList()" type="button" class="btn btn-sm btn-secondary" value="Questionnaire groups">
-                <input onclick="openQuestionDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire">
-            </div>            
-        </div>
-        <div class="card-body">
-            <div class="list-group" id='questionList'></div>            
-        </div>
+
+<div class="card shadow-sm bg-white rounded">
+    <div class="card-header">
+        {{ count($questionnaires) }} questions
+        <div class="float-right">
+            <input onclick="openQuestionnaireGroupList()" type="button" class="btn btn-sm btn-secondary" value="Questionnaire groups">
+            <input onclick="openQuestionDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire">
+        </div>            
+    </div>
+    <div class="card-body">
+        <div class="list-group" id='questionList'></div>            
     </div>
 </div>
 
@@ -195,8 +194,7 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-@section('scripts')
-<script>
+<script type="text/javascript">
     var questionnaires = {!! $questionnaires !!};
 
     var questionnaireGroups = {!! $questionnaireGroups !!};
@@ -381,7 +379,11 @@
             $('#saveQuestionBtn').html("Save");
             $('#saveQuestionBtn').removeClass('disabled');            
             $('#questionModal').modal('hide');        
-        });
+        }).catch(function(error){
+            console.log(error);
+            $('#saveQuestionBtn').html("Save");
+            $('#saveQuestionBtn').removeClass('disabled');              
+        })
         
     }
 
@@ -573,5 +575,3 @@
         });       
    }  
 </script>
-
-@endsection

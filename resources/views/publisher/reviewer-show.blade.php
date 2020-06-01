@@ -97,14 +97,25 @@
 
             </div>            
         </div>
- 
+
         <div class="row" style="margin-top:20px;">
-            <div class="col-12">
+            <div class="col-md-12">
                 @if (0 != $id)
-                    <livewire:questionnaire-list :reviewer_id="$record->id"/>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="learningmaterial-tab" data-toggle="tab" href="#learningmaterial" role="tab" aria-controls="learningmaterial" aria-selected="true">Learning materials</a>
+                        </li>
+                        <li class="nav-item">                    
+                            <a class="nav-link" id="questionnaire-tab" data-toggle="tab" href="#questionnaire" role="tab" aria-controls="questionnaire" aria-selected="false">Questionnaires</a>
+                        </li>
+                    </ul>
+                    <div class="row tab tab-content">                
+                        <div class="col-md-12 tab-pane fade show active" id="learningmaterial" role="tabpanel" aria-labelledby="learningmaterial-tab"><livewire:learningmaterial-list :reviewer_id="$record->id"/></div>
+                        <div class="col-md-12 tab-pane fade" id="questionnaire" role="tabpanel" aria-labelledby="questionnaire-tab"><livewire:questionnaire-list :reviewer_id="$record->id"/></div>
+                    </div>
                 @else
-                    <span class='font-italic text-muted'>The questionnaires will appear after you've save this reviewer.</span>
-                @endif
+                    <span class="text-muted font-italic">Learning materials & questionnaires will be available when you save the reviewer.</span>
+                @endif            
             </div>
         </div>
      
@@ -119,6 +130,16 @@
                 $('.existingImg input[name=remove_cover_photo]').val('yes');
                 $('.existingImg').hide();            
             }
+
+            $('ul.nav li.nav-item input').on('click', function(e){
+                // toggle tabs
+                $('ul.nav li.nav-item input').removeClass('active');
+                $(this).addClass('active');
+                // toggle tabs content
+                $('div.tab').hide();
+                $('div.' + $(this).attr('tab')).show();
+            });
+
         }, false);
     
     
