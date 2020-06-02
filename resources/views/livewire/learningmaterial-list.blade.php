@@ -50,7 +50,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <script type="text/javascript">
-    var learningMateriallists  = {!! $lists !!};
+    var learningMaterialLists  = {!! $lists !!};
     var selectedLearningMaterialIndex;
     var selectedLearningMaterial;  
 
@@ -96,13 +96,13 @@
         });    
     });
 
-    function loadLearningMaterials()
+    function loadLM()
     {        
         var html = '';
-        for (let i = 0; i < learningMateriallists.length; i++) {
+        for (let i = 0; i < learningMaterialLists.length; i++) {
             html = html +  `
                 <button onclick="openLearningMaterialDetail(` + i + `)" type="button" class="list-group-item list-group-item-action">
-                    ` + learningMateriallists[i].title + `
+                    ` + learningMaterialLists[i].title + `
                 </button>
             `;                
         };
@@ -121,7 +121,7 @@
         $('#learningMaterialModal textarea[name=content]').val('')
         tinymce.get('content').setContent('');
         
-        selectedLearningMaterial = learningMateriallists[id];
+        selectedLearningMaterial = learningMaterialLists[id];
         if(undefined!=selectedLearningMaterial) {
             $('#learningMaterialModal input[name=title]').val(selectedLearningMaterial.title);
             $('#learningMaterialModal textarea[name=content]').val(selectedLearningMaterial.content);
@@ -152,13 +152,13 @@
             data: formData,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            learningMateriallists = data;
+            learningMaterialLists = data;
 
             $('#saveLearningMaterialBtn').html("Save");
             $('#saveLearningMaterialBtn').removeClass('disabled');            
             $('#learningMaterialModal').modal('hide');            
             
-            loadLearningMaterials();
+            loadLM();
 
         }).catch(function(error){            
             $('#saveLearningMaterialBtn').html("Save");
@@ -182,11 +182,13 @@
             method: 'DELETE',
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}                 
         }).then(function(data){
-            learningMateriallists = data;
-            loadLearningMaterials();
+            learningMaterialLists = data;
+
             $('#deleteLearningMaterialBtn').html("Delete");
             $('#deleteLearningMaterialBtn').removeClass('disabled');            
             $('#learningMaterialModal').modal('hide');
+            
+            loadLM();            
         });                
     }    
 </script>
