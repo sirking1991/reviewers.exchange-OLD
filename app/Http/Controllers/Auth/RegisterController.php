@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Rules\Recaptcha;
 
 class RegisterController extends Controller
 {
@@ -40,6 +41,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        
     }
 
     /**
@@ -51,11 +53,12 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'type' => ['required', Rule::in(['reviewer', 'publisher', 'teacher'])],
+            'type' => ['required', Rule::in(['reviewer', 'publisher'])],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'g-recaptcha-response' => ['required', 'string', new Recaptcha()],
         ]);
     }
 
@@ -67,6 +70,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+
         return User::create([
             'type' => $data['type'],
             'first_name' => $data['first_name'],

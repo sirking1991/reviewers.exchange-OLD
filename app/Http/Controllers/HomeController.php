@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -27,5 +28,10 @@ class HomeController extends Controller
                     ? view('publisher.home') 
                     : view('reviewer.home');
         
+    }
+
+    public function tinymceImageUpload(Request $request)
+    {
+        Log::debug('tinymceImageUpload', ['request'=>$request]);
     }
 }

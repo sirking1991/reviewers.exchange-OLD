@@ -3,19 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-
-
 Auth::routes();
 
 Route::get('/', 'HomeController@index');
@@ -28,8 +15,11 @@ Route::middleware(['checkifpublisher'])->group(function () {
     Route::match(['post', 'put'], '/publisher/reviewers/{id?}', 'PublisherController@reviewerSave');    
     Route::get('/publisher/reviewers/{id}/delete', 'PublisherController@reviewerDelete');
     
-    Route::match(['post', 'put'], '/publisher/reviewers/{reviewerId}/question/{id?}', 'PublisherController@saveQuestion');
+    Route::post('/publisher/reviewers/{reviewerId}/question/{id?}', 'PublisherController@saveQuestion');
     Route::match(['delete'], '/publisher/reviewers/{reviewerId}/question/{id?}', 'PublisherController@deleteQuestion');
+
+    Route::post('/publisher/reviewers/{reviewerId}/learning-material/{id?}', 'PublisherController@saveLearningMaterial');
+    Route::match(['delete'], '/publisher/reviewers/{reviewerId}/learning-material/{id?}', 'PublisherController@deleteLearningMaterial');
     
     Route::get('/publisher/reviewers/{reviewerId}/questionnaire-groups', 'PublisherController@questionnaireGroups' );
     Route::match(['post', 'put'], '/publisher/reviewers/{reviewerId}/questionnaire-group/{id?}', 'PublisherController@questionnaireGroupSave' );
@@ -44,15 +34,16 @@ Route::middleware(['checkifpublisher'])->group(function () {
     Route::view('/publisher/statement', 'publisher.statement');
 
     
-    
 
 });
 
-Route::middleware(['auth'])->group(function(){
-
+Route::middleware(['auth'])->group(function()
+{
     Route::get('/generateExam/{reviewerId}', 'ReviewerController@generateExam');
     Route::post('/saveExamResult', 'ReviewerController@saveExamResult');
     Route::get('/userExamSummary/{reviewerId}', 'ReviewerController@userExamSummary');
+
+    Route::post('/tinymce/image-upload', 'HomeController@tinymceImageUpload');
 });
 
 Route::middleware([])->group(function(){
