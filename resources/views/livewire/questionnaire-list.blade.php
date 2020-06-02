@@ -1,15 +1,14 @@
-<div>
-    <div class="card shadow-sm bg-white rounded">
-        <div class="card-header">
-            Questionnaires ({{ count($questionnaires) }} questions)
-            <div class="float-right">
-                <input onclick="openQuestionnaireGroupList()" type="button" class="btn btn-sm btn-secondary" value="Questionnaire groups">
-                <input onclick="openQuestionDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire">
-            </div>            
-        </div>
-        <div class="card-body">
-            <div class="list-group" id='questionList'></div>            
-        </div>
+
+<div class="card shadow-sm bg-white rounded">
+    <div class="card-header">
+        {{ count($questionnaires) }} questions
+        <div class="float-right">
+            <input onclick="openQuestionnaireGroupList()" type="button" class="btn btn-sm btn-secondary" value="Questionnaire groups">
+            <input onclick="openQuestionDetail(-1)" type="button" class="btn btn-sm btn-secondary" value="New questionnaire">
+        </div>            
+    </div>
+    <div class="card-body">
+        <div class="list-group" id='questionList'></div>            
     </div>
 </div>
 
@@ -87,9 +86,13 @@
         </div>
       <div class="modal-body">        
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     {!! Form::label('questionnaire_group_id', 'Question group:', ['class' => 'control-label']) !!}
                     {!! Form::select('questionnaire_group_id', [], '', ['class' => 'form-control']) !!}                    
+                </div>
+                <div class="col-md-6">
+                    {!! Form::label('learning_material_id', 'Related learning material:', ['class' => 'control-label']) !!}
+                    {!! Form::select('learning_material_id', [], '', ['class' => 'form-control']) !!}                    
                 </div>
             </div>          
             <div class="row">
@@ -195,8 +198,7 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-@section('scripts')
-<script>
+<script type="text/javascript">
     var questionnaires = {!! $questionnaires !!};
 
     var questionnaireGroups = {!! $questionnaireGroups !!};
@@ -274,9 +276,12 @@
 
         selectedQuestionIndex = id;
         selectedAnswerIndex = -1;
-        selectedAnswer = undefined
+        selectedAnswer = undefined;
+        
+        loadLearningMaterials();
 
         $('#questionModal select[name=questionnaire_group_id]').val('0')
+        $('#questionModal select[name=learning_material_id]').val('0')
         $('#questionModal textarea[name=question]').val('')
         tinymce.get('question').setContent('');
         $('#questionModal select[name=difficulty_level]').val('normal')
@@ -290,6 +295,7 @@
         selectedQuestion = questionnaires[id];
         if(undefined!=selectedQuestion) {
             $('#questionModal select[name=questionnaire_group_id]').val(selectedQuestion.questionnaire_group_id);
+            $('#questionModal select[name=learning_material_id]').val(selectedQuestion.learning_material_id);
             $('#questionModal textarea[name=question]').val(selectedQuestion.question);
             tinymce.get('question').setContent(selectedQuestion.question);
             $('#questionModal select[name=difficulty_level]').val(selectedQuestion.difficulty_level);
@@ -336,6 +342,7 @@
     {
         var data = {
             'questionnaire_group_id': $('#questionModal select[name=questionnaire_group_id]').val(),
+            'learning_material_id': $('#questionModal select[name=learning_material_id]').val(),
             'question': tinymce.get('question').getContent(),
             'difficulty_level': $('#questionModal select[name=difficulty_level]').val(),
             'randomly_display_answers':$('#questionModal select[name=randomly_display_answers]').val(),
@@ -353,6 +360,7 @@
 
         var formData = new FormData();        
         formData.append('questionnaire_group_id', $('#questionModal select[name=questionnaire_group_id]').val());
+        formData.append('learning_material_id', $('#questionModal select[name=learning_material_id]').val());
         formData.append('question', tinymce.get('question').getContent());
         formData.append('difficulty_level', $('#questionModal select[name=difficulty_level]').val());
         formData.append('randomly_display_answers', $('#questionModal select[name=randomly_display_answers]').val());
@@ -381,7 +389,11 @@
             $('#saveQuestionBtn').html("Save");
             $('#saveQuestionBtn').removeClass('disabled');            
             $('#questionModal').modal('hide');        
-        });
+        }).catch(function(error){
+            console.log(error);
+            $('#saveQuestionBtn').html("Save");
+            $('#saveQuestionBtn').removeClass('disabled');              
+        })
         
     }
 
@@ -496,9 +508,23 @@
 
         // update questionGroup selection in questionnaireModal
         $('#questionnaire_group_id').html(options);
-
-
     }
+
+    function loadLearningMaterials()
+    {        
+        var options = `<option value='0'>None</option>`;
+        for (let i = 0; i < learningMateriallists.length; i++) {          
+
+            options = options + `
+                <option value='` + learningMateriallists[i].id + `'>` + learningMateriallists[i].title+ `</option>
+            `;
+        };
+       
+        // update questionGroup selection in questionnaireModal
+        $('#learning_material_id').html(options);
+
+        //learning_material_id
+    }    
 
     function openQuestionnaireGroupList() 
     {
@@ -573,5 +599,3 @@
         });       
    }  
 </script>
-
-@endsection

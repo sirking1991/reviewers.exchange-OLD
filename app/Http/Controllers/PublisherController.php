@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Reviewer;
 use App\Questionnaire;
+use App\LearningMaterial;
 use App\Answer;
 use App\QuestionnaireGroup;
 use Illuminate\Support\Facades\Storage;
@@ -108,6 +109,48 @@ class PublisherController extends Controller
         return response()->json();
     }
 
+    public function saveLearningMaterial(Request $request, String $reviewerId, String $id)
+    {
+        if (0 == $id) {
+            Log::debug('creating a new learning-material record');
+            $learningMaterial = LearningMaterial::create([
+                'user_id' => Auth()->user()->id,
+                'reviewer_id' => $reviewerId,
+                'title' => $request->title ?? '',
+                'content' => $request->content ?? '',
+            ]);
+        } else {
+            Log::debug('updating learning-material record');
+            $learningMaterial = LearningMaterial::where('reviewer_id', $reviewerId)->where('id', $id)->first();
+
+            if(!$learningMaterial) return response('Learning material not found', 404);
+
+            $learningMaterial->update([
+                'title' => $request->title ?? '',
+                'content' => $request->content ?? '',
+            ]);
+        }
+
+        return LearningMaterial::where('reviewer_id', $reviewerId)->get();
+    }
+
+    public function deleteLearningMaterial(String $reviewerId, String $questionId)
+    {
+        Log::debug('deleting Learning Material ' . $questionId);
+
+        $question = LearningMaterial::where('user_id', Auth()->user()->id)
+            ->where('reviewer_id', $reviewerId)
+            ->where('id', $questionId)
+            ->first();
+
+        if (!$question) return response('', 404);
+
+        Answer::where('questionnaire_id', $questionId)->delete();
+        $question->delete();
+
+        return LearningMaterial::where('reviewer_id', $reviewerId)->get();
+    }
+
     public function saveQuestion(Request $request, String $reviewerId, String $questionId)
     {
         if (0 == $questionId) {
@@ -116,6 +159,7 @@ class PublisherController extends Controller
                 'user_id' => Auth()->user()->id,
                 'reviewer_id' => $reviewerId,
                 'questionnaire_group_id' => $request->input('questionnaire_group_id') ?? '0',
+                'learning_material_id' => $request->input('learning_material_id') ?? '0',
                 'question' => $request->input('question') ?? '',
                 'image' => '',
                 'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
@@ -147,14 +191,15 @@ class PublisherController extends Controller
             }
         } else {
             Log::debug('updating question record');
-            $question = Questionnaire::where('user_id', Auth()->user()->id)
+            $question = Questionnaire::where('reviewer_id', $reviewerId)
                 ->where('id', $questionId)
                 ->first();
 
-            if (!$question) return abort(404);
+            if (!$question) return response('Questionnaire not found', 404);
 
             $question->update([
                 'questionnaire_group_id' => $request->input('questionnaire_group_id') ?? '0',
+                'learning_material_id' => $request->input('learning_material_id') ?? '0',
                 'question' => $request->input('question') ?? '',
                 'randomly_display_answers' => $request->input('randomly_display_answers') ?? 'no',
                 'difficulty_level' => $request->input('difficulty_level') ?? 'normal',
@@ -272,6 +317,7 @@ class PublisherController extends Controller
         Log::debug('deleting question ' . $questionId);
 
         $question = Questionnaire::where('user_id', Auth()->user()->id)
+            ->where('reviewer_id', $reviewerId)
             ->where('id', $questionId)
             ->first();
 
@@ -313,7 +359,7 @@ class PublisherController extends Controller
                 ->where('id', $questionnaireGroupId)
                 ->first();
 
-            if (!$questionGroup) return abort(404);
+            if (!$questionGroup) return response('QuestionnaireGroup not found', 404);
 
             $questionGroup->update([
                 'name' => $request->input('name') ?? '',
