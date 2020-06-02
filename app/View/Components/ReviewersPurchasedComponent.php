@@ -65,7 +65,15 @@ class ReviewersPurchasedComponent extends Component
                                     Incorrecly answered: <span class='wrong_answers'></span><br/>
                                     Average: <span class='average'></span>%<br/>
                                 </p>
-                                <input type='button' onclick='confirmStartExam()' class="btn btn-success btn-lg btn-block" value='Take Practice Exam' /> 
+                                <div class='row'>
+                                    <div class='col-md learning-materials'>
+                                        <input type='button' onclick='viewLearningMaterials()' class="btn btn-success btn-lg btn-block" value='Learning Materials' /> 
+                                    </div>
+                                    <div class='col-md'>
+                                        <input type='button' onclick='confirmStartExam()' class="btn btn-success btn-lg btn-block" value='Practice Exam' /> 
+                                    </div>
+                                </div>
+                                
                             </div> 
                         </div>
                     </div>  
@@ -315,7 +323,8 @@ class ReviewersPurchasedComponent extends Component
                     $("#totalScore").html('0');
             }
 
-            function timerTick(){
+            function timerTick()
+            {
                 timeRemaining--;
 
                 if (120>=timeRemaining && !$('#practiceExamModal .modal-header .time-remaining').hasClass('pulsate')) {
@@ -376,7 +385,8 @@ class ReviewersPurchasedComponent extends Component
                 setButtons();
             }
 
-            function answerClick(answerId, answerIndex){
+            function answerClick(answerId, answerIndex)
+            {
                 var answer = currentQuestion.answers[answerIndex];
                 var isSelected = undefined != answer.selected;
 
@@ -462,7 +472,8 @@ class ReviewersPurchasedComponent extends Component
                 return hDisplay + mDisplay + sDisplay; 
             }           
             
-            function animateValue(el, start, end, duration, playSound=true) {
+            function animateValue(el, start, end, duration, playSound=true) 
+            {
                 var range = end - start;
                 var current = start;
                 var increment = end > start? 1 : -1;
@@ -480,7 +491,12 @@ class ReviewersPurchasedComponent extends Component
                     }
                 }, stepTime);
 
-            }            
+            } 
+            
+            function viewLearningMaterials()
+            {
+                window.open('/reviewer/' + selectedReviewerId + '/learning-materials', 'learning-materials-' + reviewerId);
+            }
         </script>
         
         blade;

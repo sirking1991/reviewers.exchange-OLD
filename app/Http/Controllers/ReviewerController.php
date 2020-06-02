@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use App\Reviewer;
 use App\ExamResult;
 use App\ReviewerPurchase;
 use App\Questionnaire;
 use App\ExamResultQuestionAnswer;
+use App\LearningMaterial;
 
 class ReviewerController extends Controller
 {
@@ -83,6 +85,31 @@ class ReviewerController extends Controller
             'correct_answers' => ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('correct_answers'),
             'wrong_answers' => ExamResult::where('reviewer_id', $reviewerId)->where('user_id', Auth()->user()->id)->sum('wrong_answers'),
         ]);
+    }
+
+    public function viewLearningMaterials($reviewerId, $id=0)
+    {
+        $reviewer = Reviewer::find($reviewerId);
+        if(!$reviewer) {
+            abort(404, "Reviewer not found");
+        }
+
+        // check if user has purchase this reviewer
+        if(!DB::table('reviewer_purchases')
+                ->where('status', 'success')
+                ->where('reviewer_id', $reviewerId)
+                ->where('user_id', Auth()->user()->id)
+                ->exists()) {
+            abort(403, "You haven't purchase this reviewer. Pls select it from the list of reviewers available for sale");
+        }
+
+        // open the reviewer
+        $learningMaterials = LearningMaterial::where('reviewer_id', $reviewerId)->get();
+        if(0==count($learningMaterials)) {
+            abort(404, "The reviewer does not have learning materials available");
+        }
+
+        return view('reviewer.learning-materials', ['learningMaterials'=>$learningMaterials, 'selectedId' => $id]);
     }
     
 }

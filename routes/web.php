@@ -44,6 +44,8 @@ Route::middleware(['auth'])->group(function()
     Route::get('/userExamSummary/{reviewerId}', 'ReviewerController@userExamSummary');
 
     Route::post('/tinymce/image-upload', 'HomeController@tinymceImageUpload');
+
+    Route::get('/reviewer/{reviewrId}/learning-materials/{id?}', 'ReviewerController@viewLearningMaterials');
 });
 
 Route::middleware([])->group(function(){
