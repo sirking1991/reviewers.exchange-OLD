@@ -16,6 +16,8 @@ class CheckIfPublisher
      */
     public function handle($request, Closure $next)
     {
+        if(!Auth::check()) abort(403, __('Unauthorized action.'));
+
         if('publisher'!=Auth()->user()->type) {
             abort(403, __('Unauthorized action.'));
         } else {
