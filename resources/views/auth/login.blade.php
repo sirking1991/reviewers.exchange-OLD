@@ -22,7 +22,7 @@
                         <li>Reach more reviewers & students</li>
                         <li>Lowers your publication cost</li>
                         <li>Lessen the risk of piracy to your copyrighted materials</li>
-                        <li>rack the details of your sales</li>
+                        <li>Track the details of your sales</li>
                         <li>Easily withdraw funds</li>
                     </ul>
                 </div>
