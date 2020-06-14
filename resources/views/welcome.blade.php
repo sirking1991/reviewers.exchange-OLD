@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    <img height="300" src="{{ env('AWS_S3_URL') }}common/logo.jpg" alt="{{ config('app.name', 'Laravel') }}" />
+                    <img height="300" src="{{ env('AWS_S3_URL') }}common/reviewers.exchange-logo.png" alt="{{ config('app.name', 'Laravel') }}" />
                     <br/>
                     {{ config('app.name', 'Laravel') }}
                 </div>

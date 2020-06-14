@@ -4,29 +4,10 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <strong>What is Reviewers.Exchange?</strong><br/><br/>
-            <div class="row">
-                <div class="col-md-6">
-                    For students & reviewers:
-                    <ul>
-                        <li>Reviewers & students can choose from hundreds of learning materials</li>
-                        <li>A sophisticated practice exam generator ensures that questionnaires are randomly selected and answers are displayed randomly</li>
-                        <li>Track your progress of understanding a particular subject</li>
-                        <li>Take practice exams with your friends, wherever they are</li>
-                        <li>Earn stars for each correct answer and use it as a badge of honor</li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    For authors & publishers
-                    <ul>
-                        <li>Reach more reviewers & students</li>
-                        <li>Lowers your publication cost</li>
-                        <li>Lessen the risk of piracy to your copyrighted materials</li>
-                        <li>Track the details of your sales</li>
-                        <li>Easily withdraw funds</li>
-                    </ul>
-                </div>
-            </div>
+            <iframe width="750" height="500" src="https://www.youtube.com/embed/hsFkjCm4bs0" 
+                frameborder="0"
+                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+                 allowfullscreen></iframe>
         </div>
         <div class="col-md-4">
             <div class="card">

@@ -62,6 +62,17 @@
     </script>
     <!--End of Tawk.to Script-->
     @endif
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-86425777-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-86425777-2');
+    </script>
+
     
 </body>
 </html>

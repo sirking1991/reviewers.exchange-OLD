@@ -49,7 +49,7 @@ class ReviewersPurchasedComponent extends Component
                 @endif
             </div>
         </div>
-
+        <!-- reviewerPurchasedModal -->
         <div class="modal fade" id="reviewerPurchasedModal" tabindex="-1" role="dialog" aria-labelledby="reviewerPurchasedModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                 <div class="modal-content">
@@ -73,14 +73,13 @@ class ReviewersPurchasedComponent extends Component
                                         <input type='button' onclick='confirmStartExam()' class="btn btn-success btn-lg btn-block" value='Practice Exam' />
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        <!-- practiceExamModal -->
         <div class="modal fade" id="practiceExamModal" tabindex="-1" role="dialog" aria-labelledby="practiceExamModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                 <div class="modal-content">
@@ -104,7 +103,7 @@ class ReviewersPurchasedComponent extends Component
                 </div>
             </div>
         </div>
-
+        
         <script>
             var reviewers = {!! $reviewersPurchased !!}
             var selectedReviewerPurchased;
