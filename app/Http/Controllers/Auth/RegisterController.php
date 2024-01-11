@@ -70,7 +70,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-
+        \Log::debug(__METHOD__, $data);
         return User::create([
             'type' => $data['type'],
             'first_name' => $data['first_name'],

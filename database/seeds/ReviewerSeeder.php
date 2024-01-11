@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\User;
 
 class ReviewerSeeder extends Seeder
 {
@@ -22,6 +23,7 @@ class ReviewerSeeder extends Seeder
                 'questionnaires_to_display' => $faker->randomElement([10, 20, 30, 40, 50]),
                 'time_limit' => $faker->randomElement([0, 10, 20, 30, 40, 50, 60, 70, 80]),
                 'price' => $faker->numberBetween(100, 500),
+                'user_id' => User::inRandomOrder()->first()->id
             ];
         }
 
